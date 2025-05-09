@@ -77,6 +77,32 @@ class MongoDBClient {
     }
   }
 
+  async findOne(model, query, projection = {}, options = {}) {
+    if (!this._isMongoConnected()) {
+      throw new Error('MongoDB not connected in findOne');
+    }
+    if (!model || typeof model.findOne !== 'function') {
+      throw new Error('Invalid Mongoose Model provided in findOne');
+    }
+    if (!query || typeof query !== 'object') {
+      throw new Error('Invalid query object provided in findOne');
+    }
+    try {
+      const result = await model.findOne(query, projection, options).lean();
+      return result;
+      
+    } catch (err) {
+      logger.error('mongoclient findOne failed', {
+        modelName: model?.modelName || 'unknown',
+        error: err.message,
+        query: query,
+        projection: projection,
+        options: options
+      });
+      throw err;
+    }
+}
+
   async getPaginatedResults(
     model, 
     query, 

@@ -9,6 +9,9 @@ const config = {
   app: {
     port: parseInt(process.env.PORT, 10) || 3000,
     env: process.env.NODE_ENV || 'development',
+    constants : {
+      summary_refresh_threshold_hrs: process.env.SUMMARY_REFRESH_THRESHOLD_HRS || 6 * 30 * 24, // 6 months
+    }
   },
 };
 

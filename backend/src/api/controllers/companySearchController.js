@@ -25,7 +25,6 @@ query = async (req, res) => {
         } catch (error) {
             return res.status(400).json({ 
                 message: 'Invalid filter parameters',
-                details: error.message 
             });
         }
 
@@ -67,7 +66,6 @@ query = async (req, res) => {
         logger.error('Error during company search:', error);
         res.status(500).json({ 
             message: 'Failed to search companies',
-            error: error.message 
         });
     }
 };
