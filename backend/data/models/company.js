@@ -1,0 +1,68 @@
+const mongoose = require('mongoose');
+
+const companySchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+      trim: true,
+      immutable: true,
+    },
+    website: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      text: true, // text search
+      index: true,
+    },
+    founded: {
+      type: Number,
+    },
+    size: {
+      type: String,
+    },
+    location: {
+      locality: { type: String, trim: true },
+      region: { type: String, trim: true },
+      country: { type: String, trim: true }
+    },
+    industry: {
+      type: String,
+      trim: true,
+    },
+    linkedin_url: {
+      type: String,
+      trim: true,
+    },
+    summary: {
+      type: String,
+      trim: true,
+      default: null,
+      maxlength: 500 * 5, // (assuming average 5 chars per word)
+    },
+    summary_updated_at: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    _id: false,
+    autoIndex: false, // disable auto-indexing
+    timestamps: true, // createdat, updatedat.
+    // dont buffer and wait
+    bufferCommands: false,
+    // conflicts unlikely
+    optimisticConcurrency: false
+  }
+);
+
+const Company = mongoose.model('Company', companySchema);
+
+module.exports = Company;
