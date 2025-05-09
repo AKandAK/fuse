@@ -1,10 +1,10 @@
 // db.js, central to all db operations
 
 const logger = require('../utils/logger');
-const mongoClient = require('./mongoclient');
+const mongoClient = require('../mongoclient');
 
 // Models
-const Company = require('./models/company');
+const Company = require('../models/company');
 
 // functions
 

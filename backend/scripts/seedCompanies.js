@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const readline = require('readline');
-const db = require('../data/db')
+const db = require('../src/services/db')
 
 // hardcoded for simplicity
 const DATASET_FILE = 'free_company_dataset.json';
