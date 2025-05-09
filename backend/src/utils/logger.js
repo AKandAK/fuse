@@ -13,6 +13,8 @@ const logger = {
       ...metadata
     };
     logStream.write(JSON.stringify(logEntry) + '\n');
+    console.log(logEntry)
+    // TODO: comment last
   },
 
   warn: (message, meta) => logger.log('warn', message, meta),

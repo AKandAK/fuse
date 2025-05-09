@@ -19,8 +19,6 @@ const companySchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      text: true, // text search
-      index: true,
     },
     founded: {
       type: Number,
@@ -54,7 +52,7 @@ const companySchema = new mongoose.Schema(
   },
   {
     _id: false,
-    autoIndex: false, // disable auto-indexing
+    autoIndex: process.env.NODE_ENV === 'development', // disable auto-indexing for non dev
     timestamps: true, // createdat, updatedat.
     // dont buffer and wait
     bufferCommands: false,
@@ -62,6 +60,20 @@ const companySchema = new mongoose.Schema(
     optimisticConcurrency: false
   }
 );
+
+// indexes for fast querying
+  companySchema.index(
+    { name: 'text', industry: 'text' }, 
+    {
+      weights: {
+        name: 3,    // pref for name match
+        industry: 1
+      }
+    }
+  ); // text index on 'name' and industry
+  companySchema.index({ size: 1 });
+  companySchema.index({ founded: 1 });
+  companySchema.index({ "location.country": 1 });
 
 const Company = mongoose.model('Company', companySchema);
 

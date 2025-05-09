@@ -1,8 +1,7 @@
 // mongoClient.js
-require('dotenv').config();
-
+const config = require('../src/config')
 const mongoose = require('mongoose');
-const logger = require('../utils/logger');
+const logger = require('../src/utils/logger');
 
 class MongoDBClient {
   constructor() {
@@ -18,12 +17,7 @@ class MongoDBClient {
       return this.dbConnection;
     }
 
-    const uri = process.env.MONGODB_URI;
-    if (!uri) {
-      logger.error('MongoDB connection failed: URI missing');
-      throw error;
-    }
-
+    const uri = config.mongodb.uri;
     try {
       this.dbConnection = await mongoose.connect(uri, {
         minPoolSize: 1,
@@ -74,12 +68,51 @@ class MongoDBClient {
       const result = await model.create(document);
       return result;
     } catch (err) {
-      logger.error('insertOne failed', {
+      logger.error('mongoclient insertOne failed', {
         modelName: model ? model.modelName : 'unknown',
         error: err.message,
         doc: document
       });
       throw err;
+    }
+  }
+
+  async getPaginatedResults(
+    model, 
+    query, 
+    page = 1, 
+    pageSize = 20, 
+    projection = {}, 
+    options = {}
+  ) {
+    try {
+      const queryBuilder = model.find(query, projection);
+      
+      if (options.sort) {
+        queryBuilder.sort(options.sort);
+      }
+      
+      // Execute query with pagination
+      const results = await queryBuilder
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .lean();
+      
+      const total_count = await model.countDocuments(query);
+      
+      return { 
+        results,
+        total_count
+      };
+      
+    } catch (error) {
+      logger.error('mongoclient getPaginatedResults error', {
+        modelName: model?.modelName || 'unknown',
+        error: error.message,
+        query,
+        options
+      });
+      throw error;
     }
   }
 
