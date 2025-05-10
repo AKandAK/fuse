@@ -1,14 +1,13 @@
 // db.js, central to all db operations
 
-const logger = require('../utils/logger');
-const mongoClient = require('../../data/mongoclient');
+const logger = require('../../../common/logger');
+const mongoClient = require('../../../common/mongoclient');
 const mongoose = require('mongoose');
 
 // Models
 const Company = require('../models/company');
-const User = require('../models/user');
+const User = require('../../../common/models/user');
 const UserBookmark = require('../models/UserBookmark');
-const mongoclient = require('../../data/mongoclient');
 
 // functions
 
@@ -76,6 +75,26 @@ async function getUserById(userId, projection) {
   }
 }
 
+async function getUserByEmail(email, projection) {
+  try {
+    email = email?.toLowerCase();
+    const result = await mongoClient.findOne(User, { email: email }, projection);
+
+    if (!result) {
+      return null;
+    }
+    logger.info(`Successfully retrieved user by email: ${email}`);
+    return result;
+  } catch (error) {
+    logger.error('Error getUserByEmail from db:', { 
+      error: error.message, 
+      stack: error.stack,
+      companyId: email
+    });
+    return null;
+  }
+}
+
 async function getUserBookmarks(userId, page = 1, pageSize = 20, projection = {}, options = {}) {
   try {
     const _userId = new mongoose.Types.ObjectId(userId);
@@ -90,7 +109,7 @@ async function getUserBookmarks(userId, page = 1, pageSize = 20, projection = {}
       sort: options.sort || { createdAt: -1 } // Default sort by most recent bookmarks
     };
 
-    let { results, total_count } = await mongoclient.getPaginatedResults(
+    let { results, total_count } = await mongoClient.getPaginatedResults(
       UserBookmark, query, page, pageSize, projection,
       bookmarkOptions // Pass updated options with populate
     );
@@ -105,7 +124,7 @@ async function getUserBookmarks(userId, page = 1, pageSize = 20, projection = {}
 
 async function insertUser(userData) {
   try {
-    const createdUser = await mongoclient.insertOne(User, userData);
+    const createdUser = await mongoClient.insertOne(User, userData);
     logger.info('User created successfully', { userId: createdUser.id, email: createdUser.email });
     return createdUser;
   } catch (error) {
@@ -116,7 +135,7 @@ async function insertUser(userData) {
 
 async function insertUserBookmark(userBookmarkData) {
   try {
-    const createdBookmark = await mongoclient.insertOne(UserBookmark, userBookmarkData);
+    const createdBookmark = await mongoClient.insertOne(UserBookmark, userBookmarkData);
     logger.info('UserBookmark created successfully', { userId: createdBookmark.user, company: createdBookmark.company });
     return createdBookmark;
   } catch (error) {
@@ -159,6 +178,7 @@ module.exports = {
   getPaginatedCompanyResults,
   getCompanyById,
   getUserById,
+  getUserByEmail,
   getUserBookmarks,
   insertUser,
   insertUserBookmark,

@@ -2,7 +2,7 @@ const { createWriteStream } = require('fs');
 const path = require('path');
 
 // log to console and file
-const logStream = createWriteStream(path.join(__dirname, '../..', 'backend.log'), { flags: 'a' });
+const logStream = createWriteStream(path.join(__dirname, 'logfile.log'), { flags: 'a' });
 
 const logger = {
   log: (level, message, metadata = {}) => {

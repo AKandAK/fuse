@@ -1,6 +1,7 @@
-const logger = require('../../utils/logger');
+const logger = require('../../../../common/logger');
 const dbclient = require('../../services/db');
 const config = require('../../config')
+const publisher = require('../../services/publisher')
 const { validationResult } = require('express-validator'); // For input validation
 
 const summary_refresh_threshold_hrs = config.app.constants.summary_refresh_threshold_hrs;
@@ -40,6 +41,12 @@ details = async (req, res) => {
                 lastUpdated: result.summary_updated_at,
                 thresholdHours: config.app.constants.summary_refresh_threshold_hrs
             });
+            let msg = {
+                id: result.id,
+                website: result.website,
+                linkedin_url: result.linkedin_url,
+            }
+            await publisher.publish(config.scrapper_queue, msg);
         }
 
         const { summary_updated_at, ...response } = result 

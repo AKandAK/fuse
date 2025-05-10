@@ -1,4 +1,4 @@
-const logger = require('../../utils/logger');
+const logger = require('../../../../common/logger');
 const dbclient = require('../../services/db');
 const queryToMongo = require('query-to-mongo');
 const { validationResult } = require('express-validator'); // For input validation

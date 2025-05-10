@@ -1,7 +1,7 @@
 {
-  "name": "backend",
+  "name": "appserver",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed_companies": "node scripts/seedCompanies.js"
@@ -10,11 +10,19 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.806.0",
+    "@backend/common": "file:../common",
+    "bcrypt": "^5.1.1",
+    "connect-redis": "^8.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "express-session": "^1.18.1",
     "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.2",
-    "query-to-mongo": "^0.12.1"
+    "passport-local": "^1.0.0",
+    "query-to-mongo": "^0.12.1",
+    "redis": "^5.0.1"
   }
 }
