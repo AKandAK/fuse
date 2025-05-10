@@ -2,6 +2,7 @@ const logger = require('../../../../common/logger');
 const dbclient = require('../../services/db');
 const { validationResult } = require('express-validator'); // For input validation
 const jwt = require('jsonwebtoken');
+const config = require('../../config')
 
 async function createUser(req, res) {
     try {
@@ -12,7 +13,7 @@ async function createUser(req, res) {
         const { email, password, username, ..._rem } = req.body;
 
         // check if email already exists
-        const user = await dbclient.getUserByEmail(email, {_id: 1});
+        const user = await dbclient.getUserByEmailForAuth(email, {_id: 1});
         if (user) {
             return res.status(400).json({ message: 'User already exists' });
         }
@@ -42,7 +43,7 @@ const loginUser = async (req, res) => {
   }
 
   try {
-    const user = await dbclient.getUserByEmail(email);
+    const user = await dbclient.getUserByEmailForAuth(email);
     if (!user) {
       logger.warn('Login failed - user not found', { email });
       return res.status(401).json({ message: 'Invalid credentials' });

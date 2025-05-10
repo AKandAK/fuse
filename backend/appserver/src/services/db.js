@@ -1,12 +1,12 @@
 // db.js, central to all db operations
 
 const logger = require('../../../common/logger');
-const mongoClient = require('../../../common/mongoclient');
+const mongoClient = require('../../data/mongoclient');
 const mongoose = require('mongoose');
 
 // Models
-const Company = require('../models/company');
-const User = require('../../../common/models/user');
+const Company = require('../../../common/models/company');
+const User = require('../models/user');
 const UserBookmark = require('../models/UserBookmark');
 
 // functions
@@ -75,10 +75,11 @@ async function getUserById(userId, projection) {
   }
 }
 
-async function getUserByEmail(email, projection) {
+// get user by email for auth, skip lean
+async function getUserByEmailForAuth(email, projection = {}, options = {}) {
   try {
     email = email?.toLowerCase();
-    const result = await mongoClient.findOne(User, { email: email }, projection);
+    const result = await mongoClient.findOne(User, { email: email }, projection, options, lean=false);
 
     if (!result) {
       return null;
@@ -86,7 +87,7 @@ async function getUserByEmail(email, projection) {
     logger.info(`Successfully retrieved user by email: ${email}`);
     return result;
   } catch (error) {
-    logger.error('Error getUserByEmail from db:', { 
+    logger.error('Error getUserByEmailForAuth from db:', { 
       error: error.message, 
       stack: error.stack,
       companyId: email
@@ -178,7 +179,7 @@ module.exports = {
   getPaginatedCompanyResults,
   getCompanyById,
   getUserById,
-  getUserByEmail,
+  getUserByEmailForAuth,
   getUserBookmarks,
   insertUser,
   insertUserBookmark,

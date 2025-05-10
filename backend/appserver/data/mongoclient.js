@@ -1,7 +1,7 @@
 // mongoClient.js
-const config = require('../appserver/src/config')
+const config = require('../src/config')
 const mongoose = require('mongoose');
-const logger = require('./logger');
+const logger = require('../../common/logger');
 
 class MongoDBClient {
   constructor() {
@@ -98,7 +98,7 @@ class MongoDBClient {
     }
   }
 
-  async findOne(model, query, projection = {}, options = {}) {
+  async findOne(model, query, projection = {}, options = {}, lean = true) {
     if (!this._isMongoConnected()) {
       throw new Error('MongoDB not connected in findOne');
     }
@@ -109,6 +109,9 @@ class MongoDBClient {
       throw new Error('Invalid query object provided in findOne');
     }
     try {
+      if (!lean) {
+        return await model.findOne(query, projection, options);
+      }
       const result = await model.findOne(query, projection, options).lean();
       return result;
       

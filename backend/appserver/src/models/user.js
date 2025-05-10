@@ -22,14 +22,13 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       validate: {
         validator: (password) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password),
-        message: 'Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character'
+        message: 'Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character @$!%*?&'
       },
     },
   },
   {
     timestamps: true,
     autoIndex: process.env.NODE_ENV === 'development', // disable auto-indexing for non dev
-    // dont buffer and wait
     bufferCommands: false,
     toJSON: {
       transform: function(doc, ret) {
@@ -65,7 +64,7 @@ userSchema.methods.comparePassword = async function (inputPassword) {
 };
 
 // indexes
-userSchema.index({ email: 1 });
+// userSchema.index({ email: 1 });
 
 
 module.exports = mongoose.model('User', userSchema);
