@@ -1,12 +1,17 @@
 const logger = require('../../utils/logger');
 const dbclient = require('../../services/db');
 const queryToMongo = require('query-to-mongo');
+const { validationResult } = require('express-validator'); // For input validation
 
 query = async (req, res) => {
     try {
         const { search, page = 1, pageSize = 20, ...filterQuery } = req.query;
         let mongoQuery = {};
 
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
         try {
             // Parse regular filters
             const { criteria } = queryToMongo(filterQuery, {

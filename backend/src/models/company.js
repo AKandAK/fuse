@@ -51,7 +51,7 @@ const companySchema = new mongoose.Schema(
     },
   },
   {
-    _id: false,
+    // _id: false,
     autoIndex: process.env.NODE_ENV === 'development', // disable auto-indexing for non dev
     timestamps: true, // createdat, updatedat.
     // dont buffer and wait

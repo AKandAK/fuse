@@ -2,9 +2,13 @@
 
 const logger = require('../utils/logger');
 const mongoClient = require('../../data/mongoclient');
+const mongoose = require('mongoose');
 
 // Models
 const Company = require('../models/company');
+const User = require('../models/user');
+const UserBookmark = require('../models/UserBookmark');
+const mongoclient = require('../../data/mongoclient');
 
 // functions
 
@@ -49,6 +53,94 @@ async function getCompanyById(id, projection) {
   }
 }
 
+async function getUserById(userId, projection) {
+  try {
+    if (!userId) {
+      return null;
+    }
+    const _userId = new mongoose.Types.ObjectId(userId);
+    const result = await mongoClient.findOne(User, { _id: _userId }, projection);
+
+    if (!result) {
+      return null;
+    }
+    logger.info(`Successfully retrieved user by userid: ${userId}`);
+    return result;
+  } catch (error) {
+    logger.error('Error getUserById from db:', { 
+      error: error.message, 
+      stack: error.stack,
+      companyId: userId
+    });
+    return null;
+  }
+}
+
+async function getUserBookmarks(userId, page = 1, pageSize = 20, projection = {}, options = {}) {
+  try {
+    const _userId = new mongoose.Types.ObjectId(userId);
+    const query = { user: _userId };
+
+    // options to fetch company details
+    const bookmarkOptions = {
+      ...options,
+      populate: options.populate ?
+        (Array.isArray(options.populate) ? [...options.populate, 'company'] : [options.populate, 'company']) :
+        'company',
+      sort: options.sort || { createdAt: -1 } // Default sort by most recent bookmarks
+    };
+
+    let { results, total_count } = await mongoclient.getPaginatedResults(
+      UserBookmark, query, page, pageSize, projection,
+      bookmarkOptions // Pass updated options with populate
+    );
+
+    logger.info(`Successfully fetched ${results.length}/${total_count} user bookmarks for user: ${userId}.`);
+    return { results, total_count };
+  } catch (error) {
+    logger.error('Error fetching user bookmarks:', { error: error.message, stack: error.stack, userId });
+    throw error;
+  }
+}
+
+async function insertUser(userData) {
+  try {
+    const createdUser = await mongoclient.insertOne(User, userData);
+    logger.info('User created successfully', { userId: createdUser.id, email: createdUser.email });
+    return createdUser;
+  } catch (error) {
+    logger.error('Error creating user', { error: error.message, stack: error.stack, userData });
+    throw error;
+  }
+}
+
+async function insertUserBookmark(userBookmarkData) {
+  try {
+    const createdBookmark = await mongoclient.insertOne(UserBookmark, userBookmarkData);
+    logger.info('UserBookmark created successfully', { userId: createdBookmark.user, company: createdBookmark.company });
+    return createdBookmark;
+  } catch (error) {
+    logger.error('Error insertUserBookmark', { error: error.message, stack: error.stack, userBookmarkData });
+    throw error;
+  }
+}
+
+async function deleteUserBookmark(userBookmarkId) {
+  try {
+    const bookmarkId = new mongoose.Types.ObjectId(userBookmarkId)
+    const result = await UserBookmark.deleteOne({ _id: bookmarkId });
+    logger.info('User bookmark deleted successfully', { userBookmarkId });
+    return result;
+  } catch (error) {
+    logger.error('Error deleting user bookmark:', {
+      error: error.message,
+      stack: error.stack,
+      userBookmarkId,
+    });
+    throw error;
+  }
+}
+
 async function getPaginatedCompanyResults(query, page = 1, pageSize = 20, projection = {}, options = {}) {
   try {
     let { results, total_count } = await mongoClient.getPaginatedResults(Company, query, page, pageSize, projection, options);
@@ -66,4 +158,9 @@ module.exports = {
   insertManyCompanies,
   getPaginatedCompanyResults,
   getCompanyById,
+  getUserById,
+  getUserBookmarks,
+  insertUser,
+  insertUserBookmark,
+  deleteUserBookmark,
 }

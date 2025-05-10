@@ -1,11 +1,16 @@
 const logger = require('../../utils/logger');
 const dbclient = require('../../services/db');
 const config = require('../../config')
+const { validationResult } = require('express-validator'); // For input validation
 
 const summary_refresh_threshold_hrs = config.app.constants.summary_refresh_threshold_hrs;
 
 details = async (req, res) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
         const { id } = req.params;
         const projection = {
             _id: 0,

@@ -77,6 +77,27 @@ class MongoDBClient {
     }
   }
 
+  async deleteOne(model, query) {
+    if (!this._isMongoConnected()) {
+      throw new Error('MongoDB not connected deleteOne');
+    }
+    if (!model || typeof model.create !== 'function') {
+      throw new Error('Invalid Mongoose Model provided deleteOne.');
+    }
+    try {
+      const result = await model.deleteOne(query);
+      logger.info(`Successfully deleted document(s) from ${model.modelName} with query: ${JSON.stringify(query)}`);
+      return result;
+    } catch (error) {
+      logger.error(`Error deleting document(s) from ${model.modelName} with query: ${JSON.stringify(query)}:`, {
+          error: error.message,
+          stack: error.stack,
+          query
+      });
+      throw error;
+    }
+  }
+
   async findOne(model, query, projection = {}, options = {}) {
     if (!this._isMongoConnected()) {
       throw new Error('MongoDB not connected in findOne');
@@ -117,7 +138,16 @@ class MongoDBClient {
       if (options.sort) {
         queryBuilder.sort(options.sort);
       }
-      
+
+      // If populate is requested in options
+      if (options.populate) {
+        if (Array.isArray(options.populate)) {
+          options.populate.forEach(path => queryBuilder.populate(path));
+        } else {
+          queryBuilder.populate(options.populate);
+        }
+      }
+
       // Execute query with pagination
       const results = await queryBuilder
         .skip((page - 1) * pageSize)
