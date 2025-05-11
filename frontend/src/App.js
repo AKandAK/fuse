@@ -7,13 +7,13 @@ import Signup from './pages/Signup';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Component to handle redirects for authenticated users
 const AuthRedirect = ({ children }) => {
     const { isAuthenticated } = useAuth();
-    if (isAuthenticated) {
-        return <Navigate to="/home" replace />;
-    }
-    return children;
+    return isAuthenticated ? <Navigate to="/home" replace /> : children;
+};
+
+const AuthLayout = ({ children }) => {
+    return <ProtectedRoute>{children}</ProtectedRoute>;
 };
 
 function App() {
@@ -21,6 +21,7 @@ function App() {
         <AuthProvider>
             <Router>
                 <Routes>
+                    {/* Public routes */}
                     <Route
                         path="/login"
                         element={
@@ -37,14 +38,17 @@ function App() {
                             </AuthRedirect>
                         }
                     />
+                    
+                    {/* Protected routes */}
                     <Route
-                        path="/home"
+                        path="/home/*"
                         element={
-                            <ProtectedRoute>
+                            <AuthLayout>
                                 <Home />
-                            </ProtectedRoute>
+                            </AuthLayout>
                         }
                     />
+                    
                     <Route path="/" element={<Navigate to="/home" replace />} />
                     <Route path="*" element={<Navigate to="/home" replace />} />
                 </Routes>

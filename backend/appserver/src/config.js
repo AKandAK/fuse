@@ -13,12 +13,13 @@ const config = {
       summary_refresh_threshold_hrs: process.env.SUMMARY_REFRESH_THRESHOLD_HRS || 6 * 30 * 24, // 6 months
     },
   },
-  scrapper_queue: process.env.SCRAPPER_QUEUE || 'scrapper-queue',
+
   sqs: {
-    SQS_URI: process.env.SQS_URI || 'http://localhost:9324',
+    SQS_URI: process.env.SQS_URI || 'http://localhost:9324', // ElasticMQ default
     SQS_REGION: process.env.SQS_REGION || 'us-west-1',
-    SQS_ACCESS_KEY_ID: process.env.SQS_ACCESS_KEY_ID,
-    SQS_SECRET_ACCESS_KEY: process.env.SQS_SECRET_ACCESS_KEY,
+    SQS_ACCESS_KEY_ID: process.env.SQS_ACCESS_KEY_ID || 'dummy_access_key',
+    SQS_SECRET_ACCESS_KEY: process.env.SQS_SECRET_ACCESS_KEY || 'dummy_secret_key',
+    SCRAPPER_QUEUE: process.env.SCRAPPER_QUEUE || 'scrapper-queue',
   },
 
   cors: {

@@ -11,7 +11,7 @@ router.use('/bookmarks', bookmarksRoute);
 const userRoute = require('./user');
 router.use('/user', userRoute);
 
-const detailsRoute = require('./details');
-router.use('/details', detailsRoute);
+const detailsRoute = require('./summary');
+router.use('/summary', detailsRoute);
 
 module.exports = router;

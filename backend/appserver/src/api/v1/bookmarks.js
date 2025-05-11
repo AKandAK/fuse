@@ -7,28 +7,24 @@ const { body, param } = require('express-validator');
 router.post(
   '/',
   [
-    body('user').notEmpty().withMessage('user is required'),
-    body('user').isMongoId().withMessage('Invalid user'),
   ],
   bookmarkController.getBookmarksByUser
 );
 
-// Route for /api/v1/bookmark/create
+// Route for /api/v1/bookmarks/create
 router.post(
   '/create',
   [
-    body('user').notEmpty().withMessage('user is required'),
     body('companyId').notEmpty().withMessage('companyId is required'),
-    body('user').isMongoId().withMessage('Invalid user'),
   ],
   bookmarkController.createBookmark
 );
 
-// Route for /api/v1/bookmark/delete
+// Route for /api/v1/bookmarks/delete/:companyId
 router.delete(
-  '/delete/:id',
+  '/delete/:companyId',
   [
-    param('id').isMongoId().withMessage('Invalid Bookmark ID'), // Validate ID as MongoDB ObjectId
+    param('companyId').notEmpty().withMessage('companyId is required'),
   ],
   bookmarkController.deleteBookmark
 );

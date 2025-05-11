@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('../../../common/mongoose');
 
 const userBookmarkSchema = new mongoose.Schema(
   {

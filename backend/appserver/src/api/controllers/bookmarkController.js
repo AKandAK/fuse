@@ -9,10 +9,11 @@ async function createBookmark(req, res) {
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-        const { user, companyId, notes } = req.body;
+        const { companyId } = req.body;
+        const user = req.user;
 
         // validate user, company details
-        const userExists = await dbclient.getUserById(user, {_id: 1});
+        const userExists = await dbclient.getUserById(user._id, {_id: 1});
         if (!userExists) {
             return res.status(400).json({ message: 'User does not exist' });
         }
@@ -25,7 +26,6 @@ async function createBookmark(req, res) {
         const newBookmark = {
             user: userExists._id,
             company: companyExists._id,
-            notes: notes,
         };
 
         const createdBookmark = await dbclient.insertUserBookmark(newBookmark);
@@ -61,11 +61,19 @@ async function deleteBookmark(req, res) {
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
+        const { companyId } = req.params;
+
+        const user = req.user;
+        const companyExists = await dbclient.getCompanyById(companyId, {_id: 1});
+        if (!companyExists) {
+            return res.status(400).json({ message: 'Company does not exist' });
+        }
+
         const userBookmarkId = req.params.id;
-        const result = await dbclient.deleteUserBookmark(userBookmarkId);
+        const result = await dbclient.deleteUserBookmark(user._id, companyExists._id);
 
         if (result.deletedCount === 0) {
-            logger.warn('Bookmark to delete not found', { userBookmarkId });
+            logger.warn('Bookmark to delete not found', { userid: user._id, companId: companyExists._id });
             return res.status(404).json({ message: 'Bookmark not found' });
         }
 
@@ -75,7 +83,8 @@ async function deleteBookmark(req, res) {
         logger.error('Error deleting bookmark:', {
             error: error.message,
             stack: error.stack,
-            userBookmarkId: req.params.id,
+            userid: req.user._id,
+            companyId: req.params.companyId
         });
         res.status(500).json({ message: 'Failed to delete bookmark' });
     }
@@ -84,7 +93,7 @@ async function deleteBookmark(req, res) {
 async function getBookmarksByUser(req, res) {
     try {
         const { page = 1, pageSize = 20, ..._rem } = req.query;
-        const { user  } = req.body;
+        const user = req.user;
         if (!user) {
             return res.status(400).json({ 
                 message: 'Invalid user id ' + user,
@@ -99,7 +108,7 @@ async function getBookmarksByUser(req, res) {
         const queryOptions = { populate: [] };
 
         const { results, total_count } = await dbclient.getUserBookmarks(
-            user,
+            user._id,
             page, 
             pageSize,
             projection,

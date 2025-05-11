@@ -16,14 +16,14 @@ details = async (req, res) => {
         const projection = {
             _id: 0,
             id: 1,
-            name: 1,
-            website: 1,
-            founded: 1,
-            size: 1,
-            industry: 1,
-            linkedin_url: 1,
             summary: 1,
             summary_updated_at: 1,
+            website: 1,
+            linkedin_url: 1,
+            // name: 1,
+            // founded: 1,
+            // size: 1,
+            // industry: 1,
         };
         const result = await dbclient.getCompanyById(id, projection);
         if (!result) {
@@ -46,11 +46,13 @@ details = async (req, res) => {
                 website: result.website,
                 linkedin_url: result.linkedin_url,
             }
-            await publisher.publish(config.scrapper_queue, msg);
+            await publisher.publish(config.sqs.SCRAPPER_QUEUE, msg);
         }
-
-        const { summary_updated_at, ...response } = result 
-        res.json({ response });
+        
+        res.json({ 
+            id: result.id,
+            summary: result.summary,
+        });
 
     } catch (error) {
         logger.error('Error companyDetailsController:', error);

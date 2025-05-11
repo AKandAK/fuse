@@ -32,6 +32,7 @@ const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(token, config.jwt.SECRET);
     
     // Fetch user from DB
+    // TODO, maybe redis caching
     const user = await dbclient.getUserById(decoded.sub);
     if (!user) {
       throw new Error('User not found');
@@ -40,7 +41,11 @@ const authMiddleware = async (req, res, next) => {
     // Attach user to request
     req.user = user;
     next();
-  } catch (err) {
+  }
+   catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired' });
+    }
     logger.warn('Unauthorized access - invalid token', {
       path: req.path,
       ip: req.ip,

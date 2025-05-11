@@ -10,6 +10,11 @@ module.exports = {
       summary_refresh_threshold_hrs: process.env.SUMMARY_REFRESH_THRESHOLD_HRS || 6 * 30 * 24, // 6 months
     },
   },
+  
+  mongodb: {
+    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/fuse?authSource=admin',
+  },
+  
   sqs: {
     SQS_URI: process.env.SQS_URI || 'http://localhost:9324', // ElasticMQ default
     SQS_REGION: process.env.SQS_REGION || 'us-west-1',

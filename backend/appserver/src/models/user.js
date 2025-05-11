@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('../../../common/mongoose');
 const bcrypt = require('bcrypt');
 
 const SALT_WORK_FACTOR = 10;

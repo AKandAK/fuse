@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
-import axiosInstance from '../utils/axios';
+import { authService } from '../services/apiService';
 
 const Signup = () => {
     const [error, setError] = useState('');
@@ -9,10 +9,10 @@ const Signup = () => {
 
     const handleSubmit = async (credentials) => {
         try {
-            await axiosInstance.post('/user/create', credentials);
+            await authService.signup(credentials);
             navigate('/login');
         } catch (err) {
-            setError(err.response?.data?.message || 'Signup failed. Please try again.');
+            setError(err.message || 'Signup failed. Please try again.');
         }
     };
 

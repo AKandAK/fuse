@@ -1,11 +1,35 @@
 const logger = require('../common/logger');
+const db = require('./services/db')
 
-// Start the consumer
-const SQSConsumer = require('./consumer');
-const consumer = new SQSConsumer();
+async function startServer() {
+    try {
+        // start db
+        await db.connectDB();
 
-consumer.start();
+        // Start the consumer
+        const SQSConsumer = require('./services/consumer');
+        const consumer = new SQSConsumer();
+        consumer.start();
+
+    }
+    catch (error) {
+        logger.error(`Server start failed`, { 
+            error: error.message, 
+            stack: error.stack,
+            companyId: id 
+        });
+    }
+}
+
+startServer();
+
 
 // Graceful shutdown
-process.on('SIGTERM', () => consumer.stop());
-process.on('SIGINT', () => consumer.stop());
+process.on('SIGTERM', () => {
+    consumer.stop();
+    db.disconnectDB();
+});
+process.on('SIGINT', () => {
+    consumer.stop(),
+    db.disconnectDB();
+});

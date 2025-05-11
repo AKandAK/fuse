@@ -1,41 +1,48 @@
 import React from 'react';
-import { Container, Typography, Button, Box } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { Routes, Route, Outlet, useNavigate } from 'react-router-dom';
+import { Box, Tabs, Tab, Container } from '@mui/material';
+import Settings from './Settings';
+import Query from './Query';
+import Saved from './Saved';
 
-const Home = () => {
-    const navigate = useNavigate();
-    const { logout } = useAuth();
+const HomeLayout = () => {
+  const navigate = useNavigate();
+  const [value, setValue] = React.useState(0);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+    const routes = ['query', 'saved', 'settings'];
+    navigate(routes[newValue]);
+  };
 
-    return (
-        <Container component="main" maxWidth="md">
-            <Box
-                sx={{
-                    marginTop: 8,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                }}
-            >
-                <Typography component="h1" variant="h4" gutterBottom>
-                    Welcome to Home Page
-                </Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleLogout}
-                    sx={{ mt: 2 }}
-                >
-                    Logout
-                </Button>
-            </Box>
-        </Container>
-    );
+  return (
+    <Container maxWidth="xl">
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Tabs centered variant='fullWidth' value={value} onChange={handleChange}>
+          <Tab label="Query" />
+          <Tab label="Saved" />
+          <Tab label="Settings" />
+        </Tabs>
+      </Box>
+      <Box sx={{ py: 3 }}>
+        <Outlet />
+      </Box>
+    </Container>
+  );
 };
 
-export default Home; 
+const Home = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<HomeLayout />}>
+        <Route path="query" element={<Query />} />
+        <Route path="saved" element={<Saved />} />
+        <Route path="settings" element={<Settings />} />
+        {/* default query route */}
+        <Route index element={<Query />} /> 
+      </Route>
+    </Routes>
+  );
+};
+
+export default Home;

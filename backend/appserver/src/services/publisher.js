@@ -6,14 +6,14 @@ class Publisher {
   constructor() {
     this.sqs = new SQSClient({
       endpoint: config.sqs.SQS_URI,
-      region: config.sqs.SQS_REGION || 'us-east-1',
+      region: config.sqs.SQS_REGION,
       credentials: config.sqs.SQS_ACCESS_KEY_ID ? {
         accessKeyId: config.sqs.SQS_ACCESS_KEY_ID,
         secretAccessKey: config.sqs.SQS_SECRET_ACCESS_KEY
       } : undefined
     });
 
-    this.buffer = new Map(); // Map of queue URLs to message arrays
+    this.buffer = new Map(); // queue url => msgs array
     this.flushInterval = 1000; // 1 second buffer time
     this.flushTimer = null;
     this.queueUrls = {}; // Cache for queue URLs
@@ -24,14 +24,14 @@ class Publisher {
       return this.queueUrls[queueName];
     }
 
-    // For local ElasticMQ, we can construct the URL directly
+    //  local elasticmq
     if (config.sqs.SQS_URI.includes('localhost') || config.sqs.SQS_URI.includes('elasticmq')) {
       const queueUrl = `${config.sqs.SQS_URI}/queue/${queueName}`;
       this.queueUrls[queueName] = queueUrl;
       return queueUrl;
     }
 
-    // For AWS SQS, we need to get the URL from AWS
+    // aws sqs
     try {
       const { GetQueueUrlCommand } = require('@aws-sdk/client-sqs');
       const response = await this.sqs.send(new GetQueueUrlCommand({
@@ -52,18 +52,17 @@ class Publisher {
     try {
       const queueUrl = await this.getQueueUrl(queueName);
 
-      // Initialize buffer for queue if it doesn't exist
+      // initialize buffer for queue
       if (!this.buffer.has(queueUrl)) {
         this.buffer.set(queueUrl, []);
       }
 
-      // Add message to buffer
       this.buffer.get(queueUrl).push({
-        Id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
+        Id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
         MessageBody: JSON.stringify(message)
       });
 
-      // Start flush timer if not already running
+      // flush timer
       if (!this.flushTimer) {
         this.flushTimer = setTimeout(() => this.flushAll(), this.flushInterval);
       }
@@ -91,11 +90,10 @@ class Publisher {
     if (this.buffer.size === 0) return;
 
     try {
-      // Process each queue in the buffer
       for (const [queueUrl, messages] of this.buffer.entries()) {
         if (messages.length === 0) continue;
 
-        // SQS has a maximum batch size of 10 messages
+        // max sqs batchsize is 10 as well
         const batchSize = 10;
         for (let i = 0; i < messages.length; i += batchSize) {
           const batch = messages.slice(i, i + batchSize);
@@ -109,21 +107,19 @@ class Publisher {
         }
       }
 
-      // Clear the buffer
       this.buffer.clear();
     } catch (err) {
       logger.error('Failed to flush messages', {
         error: err.message,
         stack: err.stack
       });
-      // Keep messages in buffer for retry
+      // todo: clear messages in buffer
       throw err;
     }
   }
 
   async disconnect() {
     try {
-      // Flush any remaining messages before disconnecting
       await this.flushAll();
       this.sqs.destroy();
       logger.info('SQS publisher disconnected');
@@ -137,5 +133,5 @@ class Publisher {
   }
 }
 
-// Singleton instance
+// singleton
 module.exports = new Publisher();

@@ -66,12 +66,12 @@ const loginUser = async (req, res) => {
       { expiresIn: config.jwt.EXPIRES_IN || '1h' }
     );
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 1000 * 60 * 60, // 1 hour
-      sameSite: 'strict'
-    });
+    // res.cookie('token', token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   maxAge: 1000 * 60 * 60, // 1 hour
+    //   sameSite: 'strict'
+    // });
 
     logger.info(`Login successful for user: ${user.email}`);
     res.json({

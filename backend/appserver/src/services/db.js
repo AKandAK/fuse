@@ -2,7 +2,7 @@
 
 const logger = require('../../../common/logger');
 const mongoClient = require('../../data/mongoclient');
-const mongoose = require('mongoose');
+const mongoose = require('../../../common/mongoose');
 
 // Models
 const Company = require('../../../common/models/company');
@@ -96,7 +96,7 @@ async function getUserByEmailForAuth(email, projection = {}, options = {}) {
   }
 }
 
-async function getUserBookmarks(userId, page = 1, pageSize = 20, projection = {}, options = {}) {
+async function getUserBookmarks(_userId, page = 1, pageSize = 20, projection = {}, options = {}) {
   try {
     const _userId = new mongoose.Types.ObjectId(userId);
     const query = { user: _userId };
@@ -145,17 +145,18 @@ async function insertUserBookmark(userBookmarkData) {
   }
 }
 
-async function deleteUserBookmark(userBookmarkId) {
+async function deleteUserBookmark(userId, companyId) {
   try {
-    const bookmarkId = new mongoose.Types.ObjectId(userBookmarkId)
-    const result = await UserBookmark.deleteOne({ _id: bookmarkId });
-    logger.info('User bookmark deleted successfully', { userBookmarkId });
+    const _companyId = new mongoose.Types.ObjectId(companyId);
+    const _userId = new mongoose.Types.ObjectId(userId);
+    const result = await UserBookmark.deleteOne({ user: _userId, company: _companyId });
+    logger.info('User bookmark deleted successfully', { user: userId, company: companyId });
     return result;
   } catch (error) {
     logger.error('Error deleting user bookmark:', {
       error: error.message,
       stack: error.stack,
-      userBookmarkId,
+      userbookmark: { user: userId, company: companyId },
     });
     throw error;
   }
