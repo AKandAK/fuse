@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Box, Grid, Pagination, Select, MenuItem } from '@mui/material';
 import Search from '../components/Search';
 import CompanyCard from '../components/CompanyCard';
+import FilterSideBarComponent from '../components/FilterSideBarComponent';
 import { companyService } from '../services/apiService';
 import { bookmarkService } from '../services/apiService';
 
@@ -13,6 +14,7 @@ const Query = () => {
   const [expandedCards, setExpandedCards] = useState({});
   const [fetchingSummaries, setFetchingSummaries] = useState({});
   const [bookmarkedRecords, setBookmarkedRecords] = useState({});
+  const filterRef = useRef();
 
   const [pagination, setPagination] = useState({
     page: 1,
@@ -37,11 +39,18 @@ const Query = () => {
   const handleSearch = async () => {
     setLoading(true);
     try {
-      const { results, totalCount } = await companyService.search({
-        search: searchText,
-        page: pagination.page,
-        pageSize: pagination.pageSize
+      const filterUrl = filterRef?.current ? filterRef.current.getFilterUrl() : '';
+      const queryParams = new URLSearchParams({
+          search: searchText,
+          // searchType: searchType,
+          page: pagination.page.toString(),
+          pageSize: pagination.pageSize.toString()
       });
+      let fullUrl = queryParams.toString();
+      if (filterUrl) {
+        fullUrl += `&${filterUrl}`;
+      }
+      const { results, totalCount } = await companyService.search(fullUrl, searchType);
 
       setRecords(results);
       setPagination(prev => ({
@@ -91,7 +100,7 @@ const Query = () => {
 
   // cardview funcs
   // expand/collapse cardview
-  const handleSaveBookmark = async (companyId, isBookmark) => {
+  const handleSaveDeleteBookmark = async (companyId, isBookmark) => {
     if (!companyId) return;
 
     try {
@@ -118,6 +127,7 @@ const Query = () => {
     }));
   };
   
+  // fetch summary for companies, service might have retries
   const handleGetSummary = async (companyId) => {
     setFetchingSummaries(prev => ({ ...prev, [companyId]: true }));
     try {
@@ -141,8 +151,19 @@ const Query = () => {
     <Box>
 
       {/* Searchcomponent + search type dropdown */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 0, alignItems: 'center', width: '100%', flexGrow: 1 }}>
+        <Select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+          sx={{ width: '25%', p: 0 }}
+        >
+          <MenuItem value="simple_search">Simple Filtering</MenuItem>
+          <MenuItem value="open_text_search">Open Text Filtering</MenuItem>
+          <MenuItem value="advanced_text_search">Advanced Search</MenuItem>
+        </Select>
+
         <Search
+          sx={{width: '75%'}}
           searchText={searchText}
           setSearchText={setSearchText}
           loading={loading}
@@ -152,51 +173,45 @@ const Query = () => {
           minCharsForSuggestions={3}
           placeholder="Search companies..."
         />
-        
-        <Select
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
-          sx={{ minWidth: 150 }}
-        >
-          <MenuItem value="simple_search">Simple Filtering</MenuItem>
-          <MenuItem value="open_text_search">Open Text Filtering</MenuItem>
-          <MenuItem value="advanced_text_search">Advanced Search</MenuItem>
-          </Select>
       </Box>
 
-
-      {/* cardview components */}
-      <Grid container spacing={3} columns={12}>
-        {records.map((company) => (
-          <Grid item key={company.id} size={{ xs: 12, md: 4 }}> 
-            {/* smaller screens 1 card per row */}
-            <CompanyCard
-              company={company}
-              expanded={expandedCards[company.id]}
-              onExpand={() => handleExpandClick(company.id)}
-              onGetSummary={handleGetSummary}
-              onSaveBookmark={handleSaveBookmark}
-              isBookmark={bookmarkedRecords[company.id]}
-              fetchingSummary={fetchingSummaries[company.id]}
-              showSummaryButton={company.website || company.linkedin_url}
-            />
-          </Grid>
-        ))}
-      </Grid>
-
-
-
-      {/* bottom pagination ui */}
-      {pagination.totalItems > 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-          <Pagination
-            count={Math.ceil(pagination.totalItems / pagination.pageSize)}
-            page={pagination.page}
-            onChange={handlePageChange}
-            color="primary"
-          />
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, width: '100%', flexGrow: 1, gap: 2 }}>
+        <Box sx={{ width: { xs: '100%', sm: '20%' }, p: 0, mt: 4 }}>
+          <FilterSideBarComponent ref={filterRef} />
         </Box>
-      )}
+
+        <Box sx={{width: { xs: '100%', sm: '75%' }, p: 0, mt: 4 }}>
+          {/* cardview components */}
+          <Grid container spacing={3} columns={12}>
+            {records.map((company) => (
+          <Grid item key={company.id} size={{ xs: 12, md: 6 }}> 
+            {/* smaller screens 1 card per row,2 for big */}
+                <CompanyCard
+                  company={company}
+                  expanded={expandedCards[company.id]}
+                  onExpand={() => handleExpandClick(company.id)}
+                  onGetSummary={handleGetSummary}
+                  onSaveBookmark={handleSaveDeleteBookmark}
+                  isBookmark={bookmarkedRecords[company.id]}
+                  fetchingSummary={fetchingSummaries[company.id]}
+                  showSummaryButton={company.website || company.linkedin_url}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          {pagination.totalItems > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Pagination
+                count={Math.ceil(pagination.totalItems / pagination.pageSize)}
+                page={pagination.page}
+                onChange={handlePageChange}
+                color="primary"
+              />
+            </Box>
+          )}
+        </Box>
+      </Box>
     </Box>
   );
 };

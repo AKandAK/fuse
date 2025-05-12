@@ -33,11 +33,9 @@ export const authService = {
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const companyService = {
-    search: async ({ search, page, pageSize }) => {
+    search: async (paramsUrl, searchType = 'simple_search') => {
         try {
-            const response = await axiosInstance.get('/query/company', {
-                params: { search, page, pageSize }
-            });
+            const response = await axiosInstance.get(`/query/company/${searchType}?${paramsUrl}`);
             // sort
             const sortedResults = [...response.data.results].sort((a, b) => {
                 if (a.search_score != null && b.search_score != null) {
@@ -100,14 +98,35 @@ export const companyService = {
     }
 };
 
-export const bookmarkService = {
-    getBookmarks: async ({ page, pageSize }) => {
+export const publicApiService = {
+    getFilterConfig: async () => {
         try {
-            const response = await axiosInstance.get('/bookmarks', {
+            const response = await axiosInstance.get('/public/filters/company');
+            return response.data;
+        }
+        catch (error) {
+            return {}
+        }
+    }
+}
+
+export const bookmarkService = {
+    getBookmarks: async (page, pageSize) => {
+        try {
+            const response = await axiosInstance.post('/bookmarks', {
                 params: { page, pageSize }
             });
+            const sortedResults = [...response.data.results].map(x => x.company).sort((a, b) => {
+                if (a.search_score != null && b.search_score != null) {
+                    return b.search_score - a.search_score;
+                }
+                if (b.updatedAt != null && a.updatedAt != null) {
+                    return new Date(b.updatedAt) - new Date(a.updatedAt);
+                }
+                return b.name.localeCompare(a.name);
+            });
             return {
-                results: response.data.results,
+                results: sortedResults,
                 totalCount: response.data.total_count
             };
         } catch (error) {
@@ -143,4 +162,5 @@ export default {
     auth: authService,
     company: companyService,
     bookmark: bookmarkService,
+    public: publicApiService,
 };

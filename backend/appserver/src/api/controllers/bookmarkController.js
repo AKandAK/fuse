@@ -100,19 +100,23 @@ async function getBookmarksByUser(req, res) {
             });
         }
 
+        const companyPopulate = {
+            path: 'company', // reference to company
+            select: 'id name industry size founded linkedin_url locality country summary -_id' // select company fields
+        }
         const projection = {
             _id: 1,
             notes: 1,
             createdAt: 1,
         };
-        const queryOptions = { populate: [] };
+        const queryOptions = { populate: companyPopulate };
 
         const { results, total_count } = await dbclient.getUserBookmarks(
             user._id,
             page, 
             pageSize,
             projection,
-            queryOptions
+            queryOptions,
         );
 
         res.json({ 

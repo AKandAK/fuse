@@ -26,11 +26,10 @@ const companySchema = new mongoose.Schema(
     size: {
       type: String,
     },
-    location: {
-      locality: { type: String, trim: true },
-      region: { type: String, trim: true },
-      country: { type: String, trim: true }
-    },
+    locality: { type: String, trim: true },
+    region: { type: String, trim: true },
+    country: { type: String, trim: true },
+
     industry: {
       type: String,
       trim: true,
@@ -73,7 +72,7 @@ const companySchema = new mongoose.Schema(
   ); // text index on 'name' and industry
   companySchema.index({ size: 1 });
   companySchema.index({ founded: 1 });
-  companySchema.index({ "location.country": 1 });
+  companySchema.index({ country : 1 });
 
 const Company = mongoose.model('Company', companySchema);
 

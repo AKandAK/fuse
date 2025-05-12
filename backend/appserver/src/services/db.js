@@ -96,7 +96,7 @@ async function getUserByEmailForAuth(email, projection = {}, options = {}) {
   }
 }
 
-async function getUserBookmarks(_userId, page = 1, pageSize = 20, projection = {}, options = {}) {
+async function getUserBookmarks(userId, page = 1, pageSize = 20, projection = {}, options = {}) {
   try {
     const _userId = new mongoose.Types.ObjectId(userId);
     const query = { user: _userId };
@@ -105,7 +105,7 @@ async function getUserBookmarks(_userId, page = 1, pageSize = 20, projection = {
     const bookmarkOptions = {
       ...options,
       populate: options.populate ?
-        (Array.isArray(options.populate) ? [...options.populate, 'company'] : [options.populate, 'company']) :
+        (Array.isArray(options.populate) ? [...options.populate, 'company'] : [options.populate]) :
         'company',
       sort: options.sort || { createdAt: -1 } // Default sort by most recent bookmarks
     };

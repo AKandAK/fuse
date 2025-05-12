@@ -15,7 +15,7 @@ const config = {
   },
 
   sqs: {
-    SQS_URI: process.env.SQS_URI || 'http://localhost:9324', // ElasticMQ default
+    SQS_URI: process.env.SQS_URI || 'http://localhost:9324', // elasaticmq default
     SQS_REGION: process.env.SQS_REGION || 'us-west-1',
     SQS_ACCESS_KEY_ID: process.env.SQS_ACCESS_KEY_ID || 'dummy_access_key',
     SQS_SECRET_ACCESS_KEY: process.env.SQS_SECRET_ACCESS_KEY || 'dummy_secret_key',
@@ -35,6 +35,17 @@ const config = {
     SECRET: process.env.JWT_SECRET || 'secure-secret-key',
     EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1h'
   },
+
+  llm: {
+    claude: {
+      MODEL_NAME: process.env.CLAUDE_MODEL_NAME || 'claude-3-7-sonnet-20250219',
+      API_KEY: process.env.CLAUDE_API_KEY || 'claud_api_key'
+    },
+    gemini: {
+      MODEL_NAME: process.env.GEMINI_MODEL_NAME || "gemini-2.0-flash",
+      API_KEY: process.env.GEMINI_API_KEY,
+    }
+  }
 };
 
 module.exports = config;

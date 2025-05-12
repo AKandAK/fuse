@@ -14,4 +14,7 @@ router.use('/user', userRoute);
 const detailsRoute = require('./summary');
 router.use('/summary', detailsRoute);
 
+const publicApis = require('./public');
+router.use('/public', publicApis);
+
 module.exports = router;

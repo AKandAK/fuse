@@ -1,9 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const companySearchController = require('../controllers/companyQueryController');
+const advancedTextSearchController = require('../controllers/advancedTextSearchController');
 
-// Route for search /api/v1/query/company/
-router.get('/company', companySearchController.query);
+// Route for search /api/v1/query/company/simple_search/:query
+router.get('/company/simple_search', companySearchController.query);
+
+// Route for search /api/v1/query/open_text_search/:query
+router.get('/company/open_text_search', companySearchController.openTextSearch);
+
+// Route for search /api/v1/query/company/advanced_text_search/:query
+router.get('/company/advanced_text_search', advancedTextSearchController.advancedTextSearch);
 
 // Route for /api/v1/query/company/:id
 router.get('/company/:id', companySearchController.queryById);

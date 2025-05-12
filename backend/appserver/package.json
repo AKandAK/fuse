@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.806.0",
+    "@google/generative-ai": "^0.24.1",
     "bcrypt": "^5.1.1",
     "connect-redis": "^8.0.3",
     "cors": "^2.8.5",
@@ -21,7 +22,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.2",
     "passport-local": "^1.0.0",
-    "query-to-mongo": "^0.12.1",
     "redis": "^5.0.1"
   }
 }

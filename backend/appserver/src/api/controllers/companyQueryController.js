@@ -1,39 +1,19 @@
 const logger = require('../../../../common/logger');
 const dbclient = require('../../services/db');
-const queryToMongo = require('query-to-mongo');
 const { validationResult } = require('express-validator'); // For input validation
+const { buildSearchQuery, buildBaseQuery } = require('./queryControllerHelper');
 
-query = async (req, res) => {
+async function getMongoResults(res, search, page = 1, pageSize = 20, filterQuery = {}, isNaturalLanguage = false, llmSearch = '') {
     try {
-        const { search, page = 1, pageSize = 20, ...filterQuery } = req.query;
-        let mongoQuery = {};
-
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        try {
-            // Parse regular filters only
-            const { criteria } = queryToMongo(filterQuery, {
-                allowedFields: ['name', 'industry', 'size', 'founded', 'linkedin_url'],
-                defaultLimit: 0,
-                maxLimit: 0,
-            });
-            mongoQuery = criteria;
-
-            // use text search indexes if search parameter exists
-            // for now name field has text index
-            if (search) {
-                mongoQuery.$text = { $search: search };
-            }
-
-        } catch (error) {
-            return res.status(400).json({ 
-                message: 'Invalid filter parameters',
-            });
+        let mongoQuery = buildBaseQuery(filterQuery);
+        
+        if (isNaturalLanguage && llmSearch) {
+            const llmQuery = await buildSearchQuery(llmSearch, true);
+            mongoQuery = { ...mongoQuery, ...llmQuery };
+        } else if (search) {
+            mongoQuery.$text = { $search: search };
         }
 
-        // Include text score in projection if doing text search
         const projection = {
             _id: 0,
             id: 1,
@@ -43,14 +23,15 @@ query = async (req, res) => {
             size: 1,
             industry: 1,
             linkedin_url: 1,
-            location: 1,
+            locality: 1,
+            country: 1,
             summary: 1,
             updatedAt: 1,
-            ...(search && { search_score: { $meta: "textScore" } })
+            ...(search && !isNaturalLanguage && { search_score: { $meta: "textScore" } })
         };
 
         const queryOptions = {
-            sort: search
+            sort: search && !isNaturalLanguage
                 ? { search_score: { $meta: "textScore" }, updatedAt: -1 }
                 : { updatedAt: -1 }
         };
@@ -63,21 +44,48 @@ query = async (req, res) => {
             queryOptions
         );
 
-        res.json({ 
+        return res.json({ 
             page: Number(page),
             pageSize: Number(pageSize), 
             totalPages: Math.ceil(total_count/pageSize),
             total_count,
             results,
         });
-
     } catch (error) {
-        logger.error('Error during company search:', error);
-        res.status(500).json({ 
-            message: 'Failed to search companies',
+        logger.error('Search failed:', error);
+        return res.status(400).json({ 
+            message: error.message || 'Invalid search parameters',
         });
     }
-};
+}
+
+openTextSearch = async (req, res) => {
+    const { search, page = 1, pageSize = 10, ...filterQuery } = req.query;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    if (!search) {
+        return res.status(400).json({ message: 'open language search requires search parameter' });
+    }
+    const llmText = search
+    const searchText = '' // dont want to search by text index in mongodb
+    const isNaturalLanguage = true
+    const baseFilterQuery = {} // dont want to use filter options
+
+    await getMongoResults(res, searchText, page, pageSize, baseFilterQuery, isNaturalLanguage, llmText);
+}
+
+query = async (req, res) => {
+    let { search, page = 1, pageSize = 10, ...filterQuery } = req.query;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    const isNaturalLanguage = false
+
+    await getMongoResults(res, search, page, pageSize, filterQuery, isNaturalLanguage);
+}
 
 autocomplete = async (req, res) => {
     try {
@@ -135,6 +143,8 @@ queryById = async (req, res) => {
             size: 1,
             industry: 1,
             linkedin_url: 1,
+            locality: 1,
+            country: 1,
             summary: 1,
         };
         const result = await dbclient.getCompanyById(id, projection);
@@ -156,4 +166,5 @@ module.exports = {
     query,
     queryById,
     autocomplete,
+    openTextSearch,
 };

@@ -15,6 +15,10 @@ const authMiddleware = async (req, res, next) => {
     return next();
   }
 
+  if (req.path.includes('/api/v1/public/')) {
+    return next();
+  }
+
   // get token from header
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];

@@ -24,9 +24,9 @@ const CompanyCard = ({
 }) => {
   return (
     <Card sx={{ width: '100%',
-      backgroundColor: isBookmark ? '#e3f2fd' : 'background.paper',
+      backgroundColor: isBookmark ? '#e3f2fd' : '#fafafa',
       '&:hover': {
-        backgroundColor: isBookmark ? '#e3f2fd' : 'background.paper',
+        backgroundColor: isBookmark ? '#e3f2fd' : '#fafafa',
       }
      }}>
       <CardContent>
@@ -73,7 +73,7 @@ const CompanyCard = ({
               <Typography variant="body2"><strong>Size: </strong> {company.size || "NA"}</Typography>
               <Typography variant="body2"><strong>Founded: </strong> {company.founded || "NA"}</Typography>
               <Typography variant="body2"><strong>Location: </strong> 
-                {company.location ? company.location.city + ", " + company.location.country : "NA"}
+                {(company.locality || '' + " - " + company.country || '') || "NA"}
               </Typography>
               <Typography variant="body2"><strong>Linkedin: </strong>
                 {company.linkedin_url ? 
