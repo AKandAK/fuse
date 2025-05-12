@@ -1,4 +1,4 @@
-const logger = require('../../../../common/logger');
+const logger = require('@backend/common/logger');
 const dbclient = require('../../services/db');
 const config = require('../../config')
 const publisher = require('../../services/publisher')
@@ -13,6 +13,7 @@ details = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
         const { id } = req.params;
+        const { attempt } = req.query;
         const projection = {
             _id: 0,
             id: 1,
@@ -35,9 +36,14 @@ details = async (req, res) => {
         // if summary is outdated, queue it
         const summaryThreshold = new Date();
         summaryThreshold.setHours(summaryThreshold.getHours() - summary_refresh_threshold_hrs);
-        
-        if (!result.summary_updated_at || new Date(result.summary_updated_at) < summaryThreshold) {
-            logger.info(`Company ${id} has outdated summary`, {
+
+        // TODO: can also check last scrapped time for this company
+        const scheduleSummaryTask = 
+            attempt == 1 &&
+            (!result.summary_updated_at || new Date(result.summary_updated_at) < summaryThreshold)
+
+        if (scheduleSummaryTask) {
+            logger.info(`Fetching summary for Company ${id}`, {
                 lastUpdated: result.summary_updated_at,
                 thresholdHours: config.app.constants.summary_refresh_threshold_hrs
             });

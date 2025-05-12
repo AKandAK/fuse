@@ -1,7 +1,7 @@
 // mongoClient.js
 const config = require('../src/config')
-const mongoose = require('../../common/mongoose');
-const logger = require('../../common/logger');
+const mongoose = require('@backend/common/mongoose');
+const logger = require('@backend/common/logger');
 
 class MongoDBClient {
   constructor() {

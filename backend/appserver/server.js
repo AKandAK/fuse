@@ -2,7 +2,7 @@ const http = require('http');
 const app = require('./src/app');
 const config = require('./src/config');
 const dbclient = require('./src/services/db');
-const logger = require('../common/logger');
+const logger = require('@backend/common/logger');
 
 const server = http.createServer(app);
 

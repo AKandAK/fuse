@@ -4,7 +4,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed_companies": "node scripts/seedCompanies.js"
+    "seed_companies": "node scripts/seedCompanies.js",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +23,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.2",
     "passport-local": "^1.0.0",
-    "redis": "^5.0.1"
+    "redis": "^5.0.1",
+    "@backend/common": "../common"
   }
 }

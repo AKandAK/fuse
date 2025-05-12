@@ -1,7 +1,7 @@
 const { SQSClient, ReceiveMessageCommand, DeleteMessageCommand, ChangeMessageVisibilityCommand }
   = require('@aws-sdk/client-sqs');
 const config = require('../config');
-const logger = require('../../common/logger');
+const logger = require('@backend/common/logger');
 const processor = require('../processor');
 
 class SQSConsumer {

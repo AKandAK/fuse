@@ -79,7 +79,9 @@ export const companyService = {
     
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
-                const response = await axiosInstance.get(`/summary/company/${companyId}`);
+                const response = await axiosInstance.get(`/summary/company/${companyId}`, {
+                    params: { attempt } // can use this to just poll
+                });
                 const summary = response.data.summary;
                 if (summary) {
                     return summary;

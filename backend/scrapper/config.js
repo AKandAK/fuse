@@ -1,9 +1,22 @@
 require('dotenv').config();
 
 module.exports = {
+  // Scrapping config
+  puppeteer : {
+    MaxBrowsers: 1,
+    MaxPagesPerBrowser: 10,
+    TabTimeout: 10,
+    use_proxy: process.env.USEPROXY_PUPPETEER ? (process.env.USEPROXY_PUPPETEER.toLowerCase() === 'true' || process.env.USEPROXY_PUPPETEER === '1') : false,
+  },
+  proxy: {
+    username: process.env.WEBSHARE_USERNAME,
+    password: process.env.WEBSHARE_PASSWORD,
+    proxyUrl: process.env.PROXY_URL,
+  },
+
   // App Configuration
   app: {
-    port: parseInt(process.env.PORT, 10) || 5000,
+    port: parseInt(process.env.SCRAPPER_PORT, 10) || 5000,
     env: process.env.NODE_ENV || 'development',
     constants : {
       summary_refresh_threshold_hrs: process.env.SUMMARY_REFRESH_THRESHOLD_HRS || 6 * 30 * 24, // 6 months
@@ -23,5 +36,16 @@ module.exports = {
     MAX_CONCURRENT_TASKS: parseInt(process.env.MAX_CONCURRENT_TASKS || '3'), // read and process 3 msgs/tasks at max concurrently
     VISIBILITY_TIMEOUT: parseInt(process.env.VISIBILITY_TIMEOUT || '180'), // 3 minutes in seconds
     WAIT_TIME_SECONDS: parseInt(process.env.WAIT_TIME_SECONDS || '20')
+  },
+
+  llm: {
+    claude: {
+      MODEL_NAME: process.env.CLAUDE_MODEL_NAME || 'claude-3-7-sonnet-20250219',
+      API_KEY: process.env.CLAUDE_API_KEY || 'claud_api_key'
+    },
+    gemini: {
+      MODEL_NAME: process.env.GEMINI_MODEL_NAME || "gemini-2.0-flash",
+      API_KEY: process.env.GEMINI_API_KEY,
+    }
   }
 };

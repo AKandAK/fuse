@@ -10,7 +10,7 @@ const Signup = () => {
     const handleSubmit = async (credentials) => {
         try {
             await authService.signup(credentials);
-            navigate('/login');
+            navigate('/home');
         } catch (err) {
             setError(err.message || 'Signup failed. Please try again.');
         }

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
-const logger = require('../../../common/logger');
+const logger = require('@backend/common/logger');
 const dbclient = require('../services/db');
 
 const authMiddleware = async (req, res, next) => {

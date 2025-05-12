@@ -1,6 +1,6 @@
 const { SQSClient, SendMessageBatchCommand } = require('@aws-sdk/client-sqs');
 const config = require('../config');
-const logger = require('../../../common/logger');
+const logger = require('@backend/common/logger');
 
 class Publisher {
   constructor() {

@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const logger = require('../../common/logger');
+const logger = require('@backend/common/logger');
 const v1Router = require('./api/v1');
 const config = require('./config');
 const { authMiddleware } = require('./middleware/auth');

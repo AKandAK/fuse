@@ -1,7 +1,7 @@
 const { buildMongoQueryFromUrlParams } = require('../../utils/urlToMongoQuery')
 const dbclient = require('../../services/db');
 const llm = require('../../services/llm')
-const logger = require('../../../../common/logger');
+const logger = require('@backend/common/logger');
 
 advancedTextSearch = async (req, res) => {
     try {

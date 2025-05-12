@@ -26,6 +26,7 @@ const Query = () => {
   const getAutoCompleteSuggestions = async (text) => {
     try {
       if (!text) return [];
+      if (searchType != 'simple_search') return []
       const suggestions = await companyService.getAutocomplete(text) || [];
       return suggestions;
     } catch (error) {

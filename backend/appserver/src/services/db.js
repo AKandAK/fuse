@@ -1,11 +1,11 @@
 // db.js, central to all db operations
 
-const logger = require('../../../common/logger');
+const logger = require('@backend/common/logger');
 const mongoClient = require('../../data/mongoclient');
-const mongoose = require('../../../common/mongoose');
+const mongoose = require('@backend/common/mongoose');
 
 // Models
-const Company = require('../../../common/models/company');
+const Company = require('@backend/common/models/company');
 const User = require('../models/user');
 const UserBookmark = require('../models/UserBookmark');
 

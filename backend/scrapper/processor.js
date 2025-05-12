@@ -1,6 +1,8 @@
-const logger = require('../common/logger');
+const logger = require('@backend/common/logger');
 const db = require('./services/db')
 const config = require('./config')
+const scheduler = require('./browser/scheduler').getInstance()
+const llm = require('./services/llm')
 
 async function processMessage(message) {
     try {
@@ -9,13 +11,26 @@ async function processMessage(message) {
             logger.warn('ProcessMessage shouldprocess = false, skipping: ', body);
             return;
         }
-        logger.info('Processing message', {
-            messageId: message.MessageId,
-            body: body,
-        });
+        
+        let url = body.website || body.linkedin_url;
+        if (url) {
+            url = url.startsWith('http') ? url : `https://${url}`
+        }
 
-        const newSummary = 'A supernova is the colossal explosion of a star. Scientists have identified several types of supernova. One type, called a “core-collapse” supernova, occurs in the last stage in the life of massive stars that are at least eight times larger than our Sun. As these stars burn the fuel in their cores, they produce heat.'
-        await db.updateSummary(body.id, newSummary);
+        // TODO: a simple api call could also work for websites
+        // linked api could give results as well
+        // firecrawl can handle similar processing
+
+        const result = await scheduler.enqueue(url);
+        const cleanedResult = cleanWebsiteContent(result);
+        if (cleanedResult && cleanedResult.length > 100) {
+            const llmSummary = await llm.getSummaryOfWebsite(cleanedResult)
+            await db.updateSummary(body.id, llmSummary);
+            logger.info('Summary updated', {
+                messageId: message.MessageId,
+                body: body,
+            });
+        }
     }
     catch(error) {
         logger.error(`processMessage failed`, { 
@@ -40,6 +55,14 @@ async function shouldProcess(body) {
     return false;
 }
 
+function cleanWebsiteContent(textContent) {
+  if (!textContent) return ''
+  // remove multi spacing, new lines
+  textContent = textContent.split(/\r\n|\r|\n/).filter(line => line.trim() !== "").join(". ");
+
+  textContent = textContent.replace(/\s{2,}/g, ".");
+  return textContent.trim();
+}
 
 module.exports = {
     processMessage,

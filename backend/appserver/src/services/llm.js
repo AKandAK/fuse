@@ -1,5 +1,5 @@
 const config = require('../config');
-const logger = require('../../../common/logger');
+const logger = require('@backend/common/logger');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 let genAI = new GoogleGenerativeAI(config.llm.gemini.API_KEY);;
@@ -51,7 +51,7 @@ async function convertTextToMongoQuery(text, allowedFields = []) {
     YOUR OUTPUT:`;
 
   try {
-    const response = await queryGemini(prompt, "PRO");
+    const response = await queryGemini(prompt);
     const result = safeParseJSON(response);
     
     Object.keys(result).forEach(field => {
@@ -87,7 +87,7 @@ async function convertTextToUrl(text, availableFields = [], availableOps = ["eq"
   YOUR OUTPUT:`;
 
   try {
-    const response = await queryGemini(prompt, "FLASH");
+    const response = await queryGemini(prompt);
     return response.trim();
   } catch (error) {
     logger.error("convertTextToUrl conversion failed:", error);

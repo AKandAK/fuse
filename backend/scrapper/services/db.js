@@ -1,10 +1,10 @@
 // db.js, central to all db operations
 
-const logger = require('../../common/logger');
+const logger = require('@backend/common/logger');
 const mongoClient = require('./mongoclient');
 
 // Models
-const Company = require('../../common/models/company');
+const Company = require('@backend/common/models/company');
 
 // functions
 
@@ -40,7 +40,7 @@ async function updateSummary(id, newSummary) {
   try {
     const query = { id: id };
     const updateData = {
-      summary: newSummary,
+      summary: newSummary.slice(0, 2400),
       summary_updated_at: new Date(),
     };
 
