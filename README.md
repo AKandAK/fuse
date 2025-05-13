@@ -18,11 +18,12 @@ Create these env files and add up the necessary environment variables
 
 Install dependencies and run services
     
-    ```
+    ```bash
     bash restart_backend.sh
     ```
     or individual services with
-    ```
+
+    ```bash
     cd backend/appserver
     npm install
 
@@ -31,7 +32,9 @@ Install dependencies and run services
     pm2 start server.js --name "appservice" --env .env
 
     cd ../..
+    ```
 
+    ```bash
     cd /backend/scrapper
     npm install
 
@@ -39,7 +42,8 @@ Install dependencies and run services
     or
     pm2 start server.js --name "scrapper" --env .env
     ```
-    (note to run npm install in /common as well)
+    
+    (run npm install in /common as well)
 
 ### Frontend Run Development
 
