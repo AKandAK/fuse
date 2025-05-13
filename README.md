@@ -16,12 +16,12 @@ Create these env files and add up the necessary environment variables
 
 ### Backend Run
 
-Install dependencies and run services
-    
+*  Using script:
+
     ```bash
     bash restart_backend.sh
     ```
-    or individual services with
+*  Individual services:
 
     ```bash
     cd backend/appserver
