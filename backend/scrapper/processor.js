@@ -44,7 +44,7 @@ async function processMessage(message) {
 async function shouldProcess(body) {
     const result = await db.getLastSummaryUpdateTime(body.id);
 
-    // better with inmemory rather than db
+    // better with inmemory rather than db, use scrapped_at time maybe
     const summaryThreshold = new Date();
     summaryThreshold.setHours(summaryThreshold.getHours() - config.app.constants.summary_refresh_threshold_hrs);
     

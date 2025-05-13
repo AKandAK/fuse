@@ -40,13 +40,9 @@ module.exports = {
   },
 
   llm: {
-    claude: {
-      MODEL_NAME: process.env.CLAUDE_MODEL_NAME || 'claude-3-7-sonnet-20250219',
-      API_KEY: process.env.CLAUDE_API_KEY || 'claud_api_key'
-    },
     gemini: {
       MODEL_NAME: process.env.GEMINI_MODEL_NAME || "gemini-2.0-flash",
-      API_KEY: process.env.GEMINI_API_KEY,
+      API_KEY: process.env.GEMINI_API_KEY || "gemini_api_key",
     }
   }
 };
