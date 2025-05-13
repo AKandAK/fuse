@@ -23,7 +23,7 @@ class BrowserManager {
           const browser = await puppeteerModule.createBrowser();
           this.browsers.push(browser);
         } catch (error) {
-          logger.error('Error initializing browser:', error);
+          logger.error('Error initializing browser:', {error: error});
           throw new Error('initializeBrowsers failed');
         }
       }

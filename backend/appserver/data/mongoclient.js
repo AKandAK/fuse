@@ -125,7 +125,7 @@ class MongoDBClient {
       });
       throw err;
     }
-}
+  }
 
   async getPaginatedResults(
     model, 

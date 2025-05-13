@@ -4,7 +4,7 @@ const companySearchController = require('../controllers/companyQueryController')
 const advancedTextSearchController = require('../controllers/advancedTextSearchController');
 
 // Route for search /api/v1/query/company/simple_search/:query
-router.get('/company/simple_search', companySearchController.query);
+router.get('/company/simple_search', companySearchController.simpleTextSearch);
 
 // Route for search /api/v1/query/open_text_search/:query
 router.get('/company/open_text_search', companySearchController.openTextSearch);

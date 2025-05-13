@@ -73,6 +73,7 @@ const companySchema = new mongoose.Schema(
   companySchema.index({ size: 1 });
   companySchema.index({ founded: 1 });
   companySchema.index({ country : 1 });
+  companySchema.index({ website : 1 });
 
 const Company = mongoose.model('Company', companySchema);
 

@@ -92,7 +92,7 @@ async function deleteBookmark(req, res) {
 
 async function getBookmarksByUser(req, res) {
     try {
-        const { page = 1, pageSize = 20, ..._rem } = req.query;
+        const { page = '1', pageSize = '20', ..._rem } = req.query;
         const user = req.user;
         if (!user) {
             return res.status(400).json({ 
@@ -113,8 +113,8 @@ async function getBookmarksByUser(req, res) {
 
         const { results, total_count } = await dbclient.getUserBookmarks(
             user._id,
-            page, 
-            pageSize,
+            Number(page), 
+            Number(pageSize),
             projection,
             queryOptions,
         );

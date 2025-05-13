@@ -6,6 +6,7 @@ module.exports = {
     MaxBrowsers: 1,
     MaxPagesPerBrowser: 10,
     TabTimeout: 10,
+    headless: process.env.HEADLESS_PUPPETEER ? (process.env.HEADLESS_PUPPETEER.toLowerCase() === 'true' || process.env.HEADLESS_PUPPETEER === '1') : false,
     use_proxy: process.env.USEPROXY_PUPPETEER ? (process.env.USEPROXY_PUPPETEER.toLowerCase() === 'true' || process.env.USEPROXY_PUPPETEER === '1') : false,
   },
   proxy: {

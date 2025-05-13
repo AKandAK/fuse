@@ -7,7 +7,7 @@ const mongoose = require('@backend/common/mongoose');
 // Models
 const Company = require('@backend/common/models/company');
 const User = require('../models/user');
-const UserBookmark = require('../models/UserBookmark');
+const UserBookmark = require('../models/userBookmark');
 
 // functions
 
@@ -49,6 +49,23 @@ async function getCompanyById(id, projection) {
       companyId: id 
     });
     return null;
+  }
+}
+
+async function getCompaniesByWebsite(websitesList, projection, page = 1, pageSize = 10, options) {
+  try {
+    if (!websitesList || websitesList.length == 0) {
+      return [];
+    }
+    const queryOptions = {sort: { updatedAt: -1 }};
+    const {results, total_count} = await mongoClient.getPaginatedResults(Company, { website: { $in: websitesList } }, page, pageSize, projection, queryOptions);
+    return results;
+  } catch (error) {
+    logger.error('Error getCompaniesByWebsite from db:', { 
+      error: error.message, 
+      stack: error.stack,
+    });
+    return [];
   }
 }
 
@@ -185,4 +202,5 @@ module.exports = {
   insertUser,
   insertUserBookmark,
   deleteUserBookmark,
+  getCompaniesByWebsite,
 }

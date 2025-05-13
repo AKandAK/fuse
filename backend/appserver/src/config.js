@@ -44,7 +44,11 @@ const config = {
     gemini: {
       MODEL_NAME: process.env.GEMINI_MODEL_NAME || "gemini-2.0-flash",
       API_KEY: process.env.GEMINI_API_KEY,
-    }
+    },
+  },
+  search: {
+    GOOGLE_JSON_SEARCH_API_KEY: process.env.GOOGLE_JSON_SEARCH_API_KEY || 'dummy_key',
+    GOOGLE_CSE_ID: process.env.GOOGLE_CSE_ID || 'google_cse_id',
   }
 };
 

@@ -42,7 +42,7 @@ async function emulateHumanBehavior(page) {
 async function createBrowser() {
     try {
         const launchArgs = {
-            headless: false,
+            headless: config.puppeteer.headless,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
