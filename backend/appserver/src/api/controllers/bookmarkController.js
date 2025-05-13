@@ -7,7 +7,7 @@ async function createBookmark(req, res) {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().join(", ") });
         }
         const { companyId } = req.body;
         const user = req.user;
@@ -59,7 +59,7 @@ async function deleteBookmark(req, res) {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().join(", ") });
         }
         const { companyId } = req.params;
 
@@ -102,7 +102,7 @@ async function getBookmarksByUser(req, res) {
 
         const companyPopulate = {
             path: 'company', // reference to company
-            select: 'id name industry size founded linkedin_url locality country summary -_id' // select company fields
+            select: 'id name industry size founded website linkedin_url locality country summary -_id' // select company fields
         }
         const projection = {
             _id: 1,

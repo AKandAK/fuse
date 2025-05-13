@@ -15,6 +15,8 @@ async function processMessage(message) {
         let url = body.website || body.linkedin_url;
         if (url) {
             url = url.startsWith('http') ? url : `https://${url}`
+            //remove all special characters except . -
+            url = url.replace(/[^a-zA-Z0-9.\/-]/g, '');
         }
 
         // TODO: a simple api call could also work for websites

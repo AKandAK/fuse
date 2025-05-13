@@ -48,7 +48,7 @@ openTextSearch = async (req, res) => {
         const { search, page = '1', pageSize = '10', ...filterQuery } = req.query;
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().join(", ") });
         }
         if (!search) {
             return res.status(400).json({ message: 'open language search requires search parameter' });
@@ -58,9 +58,14 @@ openTextSearch = async (req, res) => {
         // dont want to use filters for open text search
         const llmText = search
         const llmQuery = await buildSearchQuery(llmText, true);
+        if (!llmQuery) {
+            res.status(503).json({ 
+                message: 'Generative AI Api is not available now',
+            });
+        }
         let mongoQuery = { ...llmQuery }
 
-        const resposne = await getMongoResults(mongoQuery, searchText, Number(page), Number(pageSize));
+        const resposne = await getMongoResults(mongoQuery, search, Number(page), Number(pageSize));
         return res.json(resposne);
     }
     catch (error) {
@@ -76,7 +81,7 @@ simpleTextSearch = async (req, res) => {
         let { search, page = '1', pageSize = '10', ...filterQuery } = req.query;
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().join(", ") });
         }
         let mongoQuery = buildBaseQuery(filterQuery);
         if (search) {
@@ -98,7 +103,7 @@ autocomplete = async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().join(", ") });
         }
         const { text } = req.params;
 
@@ -137,7 +142,7 @@ queryById = async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().join(", ") });
         }
         const { id } = req.params;
         

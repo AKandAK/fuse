@@ -58,10 +58,10 @@ async function getSearchResults(searchText, page = 1, pageSize = 20, searchEngin
       const { results, total_count } = await googleSearch(tweakedGoogleSearchText, page, pageSize);
       return { results, total_count };
     }
-    return { results: [], total_count: 0 }
+    return null;
   }
   catch (error) {
-    return { results: [], total_count: 0 }
+    return null;
   }
 }
 

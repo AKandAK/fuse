@@ -1,5 +1,12 @@
 import axiosInstance from '../utils/axios';
 import config from '../config';
+import { errorManager } from '../components/ErrorNotification';
+
+const throwAndNotify = (error, defaultMessage) => {
+    const message = error.response?.data?.message || defaultMessage;
+    errorManager.notify(message);
+    throw new Error(message);
+};
 
 export const authService = {
     login: async (credentials) => {
@@ -7,7 +14,7 @@ export const authService = {
             const response = await axiosInstance.post('/user/login', credentials);
             return response.data;
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'Login failed');
+            throwAndNotify(error, 'Login failed');
         }
     },
 
@@ -16,18 +23,9 @@ export const authService = {
             const response = await axiosInstance.post('/user/create', credentials);
             return response.data;
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'Signup failed');
+            throwAndNotify(error, 'Signup failed');
         }
-    },
-
-    logout: async () => {
-        try {
-            await axiosInstance.post('/user/logout');
-        } catch (error) {
-            console.error('Logout failed:', error);
-            throw error;
-        }
-    },
+    }
 };
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -51,7 +49,7 @@ export const companyService = {
                 totalCount: response.data.total_count
             };
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'Company search failed');
+            throwAndNotify(error, 'Company search failed');
         }
     },
 
@@ -60,7 +58,7 @@ export const companyService = {
             const response = await axiosInstance.get(`/query/company/${id}`);
             return response.data.result;
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'Failed to fetch company details');
+            throwAndNotify(error, 'Failed to fetch company details');
         }
     },
 
@@ -92,11 +90,11 @@ export const companyService = {
                 }
     
             } catch (error) {
-                throw new Error(error.response?.data?.message || 'Failed to fetch company summary');
+                // throw new Error(error.response?.data?.message || 'Failed to fetch company summary');
+                console.log('Error fetching company summary', error)
             }
         }
-        // After all attempts, if no summary
-        return null;
+        throwAndNotify(new Error(), 'Failed to fetch company summary after all attempts');
     }
 };
 
@@ -132,7 +130,7 @@ export const bookmarkService = {
                 totalCount: response.data.total_count
             };
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'getBookmarks failed');
+            throwAndNotify(error, 'Failed to get bookmarks');
         }
     },
     
@@ -144,10 +142,10 @@ export const bookmarkService = {
             return response.data;
         } catch (error) {
             if (error.response?.status === 409) {
-                console.log('Bookmark already exists');
+                errorManager.notify('Bookmark already exists');
                 return;
             }
-            throw new Error(error.response?.data?.message || 'Failed to save saveBookmark');
+            throwAndNotify(error, 'Failed to save bookmark');
         }
     },
 
@@ -155,7 +153,7 @@ export const bookmarkService = {
         try {
             const response = await axiosInstance.delete(`/bookmarks/delete/${companyId}`);
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'Failed to delete saveBookmark');
+            throwAndNotify(error, 'Failed to delete bookmark');
         }
     },
 }

@@ -5,11 +5,12 @@ import CompanyCard from '../components/CompanyCard';
 import FilterSideBarComponent from '../components/FilterSideBarComponent';
 import { companyService } from '../services/apiService';
 import { bookmarkService } from '../services/apiService';
+import { useQuery } from '../contexts/QueryContext';
 
 const Query = () => {
   const [searchText, setSearchText] = useState('');
   const [searchType, setSearchType] = useState('simple_search');
-  const [records, setRecords] = useState([]);
+  const { records, setRecords, totalCount, setTotalCount } = useQuery();
   const [loading, setLoading] = useState(false);
   const [expandedCards, setExpandedCards] = useState({});
   const [fetchingSummaries, setFetchingSummaries] = useState({});
@@ -19,7 +20,7 @@ const Query = () => {
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
-    totalItems: 0
+    totalItems: totalCount
   });
 
   // autocomplete funcs
@@ -43,7 +44,6 @@ const Query = () => {
       const filterUrl = filterRef?.current ? filterRef.current.getFilterUrl() : '';
       const queryParams = new URLSearchParams({
           search: searchText,
-          // searchType: searchType,
           page: pagination.page.toString(),
           pageSize: pagination.pageSize.toString()
       });
@@ -51,12 +51,13 @@ const Query = () => {
       if (filterUrl) {
         fullUrl += `&${filterUrl}`;
       }
-      const { results, totalCount } = await companyService.search(fullUrl, searchType);
+      const { results, totalCount: newTotalCount } = await companyService.search(fullUrl, searchType);
 
       setRecords(results);
+      setTotalCount(newTotalCount);
       setPagination(prev => ({
         ...prev,
-        totalItems: totalCount
+        totalItems: newTotalCount
       }));
     } catch (error) {
       console.error('Search failed:', error.message);
@@ -75,6 +76,7 @@ const Query = () => {
       if (!result) return;
       
       setRecords([result]);
+      setTotalCount(1);
       setPagination(prev => ({
         ...prev,
         totalItems: 1

@@ -8,7 +8,7 @@ async function createUser(req, res) {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().join(", ") });
         }
         const { email, password, username, ..._rem } = req.body;
 
@@ -17,6 +17,12 @@ async function createUser(req, res) {
         if (user) {
             return res.status(400).json({ message: 'User already exists' });
         }
+        // check if password doesnt match specs
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({ message: 'Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character @$!%*?&' });
+        }
+
         const newUser = {
             email: email.toLowerCase(),
             password: password.trim(),

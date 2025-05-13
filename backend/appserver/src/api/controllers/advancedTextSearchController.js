@@ -9,11 +9,19 @@ advancedTextSearch = async (req, res) => {
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ message: errors.array().join(", ") }); message: errors.array().join(", ")
         }
 
         // fetch search results through googlesearch
-        const { results, total_count } = await searchAgent.getSearchResults(search.trim(), Number(page), Number('pageSize'), 'googleJson');
+        const searchResults = await searchAgent.getSearchResults(search.trim(), Number(page), Number('pageSize'), 'googleJson');
+        
+        if (!searchResults) {
+            res.status(503).json({ 
+                message: 'Search Engine Apis not available',
+            });
+        }
+        const { results, total_count } = searchResults;
+
         const trimmedwebsites = results.map(item => {
             try {
                 let hostname = new URL(item.url).hostname;

@@ -32,8 +32,8 @@ async function buildSearchQuery(searchText, isNaturalLanguage = false) {
         
         return await llm.convertTextToMongoQuery(searchText, ALLOWED_FIELDS);
     } catch (error) {
-        logger.error('LLM query building failed:', error);
-        return {};
+        logger.error('LLM query building failed:', {error: error});
+        return null;
     }
 }
 

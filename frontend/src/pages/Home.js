@@ -4,6 +4,7 @@ import { Box, Tabs, Tab, Container } from '@mui/material';
 import Settings from './Settings';
 import Query from './Query';
 import Saved from './Saved';
+import { QueryProvider } from '../contexts/QueryContext';
 
 const HomeLayout = () => {
   const navigate = useNavigate();
@@ -33,15 +34,18 @@ const HomeLayout = () => {
 
 const Home = () => {
   return (
-    <Routes>
-      <Route path="/" element={<HomeLayout />}>
-        <Route path="query" element={<Query />} />
-        <Route path="saved" element={<Saved />} />
-        <Route path="settings" element={<Settings />} />
-        {/* default query route */}
-        <Route index element={<Query />} /> 
-      </Route>
-    </Routes>
+    // query states like searched records stay in memory
+    <QueryProvider>
+      <Routes>
+        <Route path="/" element={<HomeLayout />}>
+          <Route path="query" element={<Query />} />
+          <Route path="saved" element={<Saved />} />
+          <Route path="settings" element={<Settings />} />
+          {/* default query route */}
+          <Route index element={<Query />} /> 
+        </Route>
+      </Routes>
+    </QueryProvider>
   );
 };
 
