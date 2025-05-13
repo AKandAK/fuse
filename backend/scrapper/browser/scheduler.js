@@ -32,9 +32,9 @@ class BrowserManager {
     }
   }
 
-  enqueue(url) {
+  enqueue(scrapTask) {
     return new Promise(async (resolve, reject) => {
-      this.queue.push({ url, resolve, reject });
+      this.queue.push({ scrapTask, resolve, reject });
       if (!this.isProcessing) {
         this._processQueue();
       }
@@ -46,13 +46,13 @@ class BrowserManager {
     this.isProcessing = true;
 
     while (this.queue.length > 0 && this.browsers.length > 0) {
-      const { url, resolve, reject } = this.queue.shift();
+      const { scrapTask, resolve, reject } = this.queue.shift();
       const availableBrowserIndex = this._findAvailableBrowser();
 
       if (availableBrowserIndex !== -1) {
         this.activePages[availableBrowserIndex]++;
         try {
-          const data = await this._scrapeWithBrowser(this.browsers[availableBrowserIndex], url);
+          const data = await this._scrapeWithBrowser(this.browsers[availableBrowserIndex], scrapTask);
           resolve(data);
         } catch (error) {
           reject(error);
@@ -86,11 +86,11 @@ class BrowserManager {
     return -1;
   }
 
-  async _scrapeWithBrowser(browser, url) {
+  async _scrapeWithBrowser(browser, scrapTask) {
     try {
-      return await puppeteerModule.scrapUrl(browser, url);
+      return await puppeteerModule.scrapUrl(browser, scrapTask);
     } catch (error) {
-      logger.error(`Error during scraping of ${url}:`, error);
+      logger.error(`Error during scraping of ${scrapTask}:`, {error: error});
       throw error;
     }
   }

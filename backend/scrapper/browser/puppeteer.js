@@ -30,7 +30,8 @@ async function emulateHumanBehavior(page) {
         width: Math.floor(Math.random() * 400) + 800,
         height: Math.floor(Math.random() * 300) + 600,
     });
-
+    await page.waitForTimeout(generateRandomDelay(100, 300)); 
+    
     if (Math.random() > 0.5) {
         await page.evaluate(() => {
             window.scrollBy(0, Math.random() * 100 - 50);
@@ -66,7 +67,13 @@ async function createBrowser() {
     }
 }
 
-async function scrapUrl(browser, url) {
+async function scrapUrl(browser, scrapTask) {
+    const func = scrapTask.func;
+    return await func(browser, scrapTask);
+}
+
+async function scrapHtmlText(browser, scrapTask) {
+    const url = scrapTask.url;
     let page;
     const timeoutMs = config.puppeteer.TabTimeout * 1000;
     let content = '';
@@ -103,4 +110,56 @@ async function scrapUrl(browser, url) {
     }
 }
 
-module.exports = { createBrowser, scrapUrl };
+async function scrapGoogleWebSourcesApi(browser, scrapTask) {
+    const searchText = scrapTask.searchText;
+    let page;
+    const timeoutMs = config.puppeteer.TabTimeout * 1000;
+    try {
+        page = await browser.newPage();
+        page.setDefaultTimeout(timeoutMs);
+
+
+        if (config.puppeteer.use_proxy && config.proxy.username && config.proxy.password && config.proxy.proxyUrl) {
+            await page.authenticate({
+                username: config.proxy.username,
+                password: config.proxy.password,
+            });
+        }
+
+        await page.setUserAgent(getRandomUserAgent());
+        await emulateHumanBehavior(page);
+
+        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchText)}`;
+        await page.goto(googleSearchUrl, { waitUntil: 'networkidle2' });
+
+        // intercept network requests
+        let interceptedResponse = "";
+        page.on('response', async (response) => {
+            const url = response.url();
+            if (url.includes("google.com/async/ecr")) {
+                try {
+                    interceptedResponse = await response.text();
+                    return interceptedResponse
+                } catch (error) {
+                    logger.error("Error fetching intercepted response:", {error: error});
+                }
+            }
+        });
+
+        return '';
+    } catch (error) {
+        logger.error("Error fetching intercepted response:", {error: error});
+        return "";
+    } finally {
+        if (page) {
+            await page.close();
+        }
+    }
+}
+
+module.exports = { 
+    createBrowser, 
+    scrapUrl,
+    scrapHtmlText,
+    scrapGoogleWebSourcesApi,
+};

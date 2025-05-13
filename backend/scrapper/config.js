@@ -3,9 +3,10 @@ require('dotenv').config();
 module.exports = {
   // Scrapping config
   puppeteer : {
-    MaxBrowsers: 1,
-    MaxPagesPerBrowser: 10,
-    TabTimeout: 10,
+    MaxBrowsers: process.env.MAXBROWSERS ? parseInt(process.env.MAXBROWSERS) : 2,
+    MaxPagesPerBrowser: process.env.MAXPAGES_PERBROWSER ? parseInt(process.env.MAXPAGES_PERBROWSER) : 5,
+    TabTimeout: process.env.TAB_TIMEOUT_SEC ? parseInt(process.env.TAB_TIMEOUT_SEC) : 10,
+
     headless: process.env.HEADLESS_PUPPETEER ? (process.env.HEADLESS_PUPPETEER.toLowerCase() === 'true' || process.env.HEADLESS_PUPPETEER === '1') : false,
     use_proxy: process.env.USEPROXY_PUPPETEER ? (process.env.USEPROXY_PUPPETEER.toLowerCase() === 'true' || process.env.USEPROXY_PUPPETEER === '1') : false,
   },
@@ -24,6 +25,10 @@ module.exports = {
     },
   },
   
+  cors: {
+    ORIGINS: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:4000', 'http://localhost:4001']
+  },
+
   mongodb: {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/fuse?authSource=admin',
   },

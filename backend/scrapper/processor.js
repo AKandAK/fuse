@@ -3,6 +3,8 @@ const db = require('./services/db')
 const config = require('./config')
 const scheduler = require('./browser/scheduler').getInstance()
 const llm = require('./services/llm')
+const { scrapHtmlText } = require('./browser/puppeteer')
+
 
 async function processMessage(message) {
     try {
@@ -23,7 +25,11 @@ async function processMessage(message) {
         // linked api could give results as well
         // firecrawl can handle similar processing
 
-        const result = await scheduler.enqueue(url);
+        const scrapTask = {
+            func: scrapHtmlText,
+            url: url
+        };
+        const result = await scheduler.enqueue(scrapTask);
         const cleanedResult = cleanWebsiteContent(result);
         if (cleanedResult && cleanedResult.length > 100) {
             const llmSummary = await llm.getSummaryOfWebsite(cleanedResult)
