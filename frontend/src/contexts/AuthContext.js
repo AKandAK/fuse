@@ -7,22 +7,15 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem(config.TOKEN_KEY));
     const [isAuthenticated, setIsAuthenticated] = useState(!!token);
 
-    useEffect(() => {
-        if (token) {
-            localStorage.setItem(config.TOKEN_KEY, token);
-            setIsAuthenticated(true);
-        } else {
-            localStorage.removeItem(config.TOKEN_KEY);
-            setIsAuthenticated(false);
-        }
-    }, [token]);
-
     const login = (newToken) => {
-        setToken(newToken);
+        localStorage.setItem(config.TOKEN_KEY, newToken);
+        setIsAuthenticated(true);
+        setToken(newToken)
     };
 
     const logout = () => {
-        setToken(null);
+        localStorage.removeItem(config.TOKEN_KEY);
+        setIsAuthenticated(false);
     };
 
     return (

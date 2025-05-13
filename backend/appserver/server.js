@@ -22,15 +22,18 @@ async function startServer() {
 
 startServer();
 
-const gracefulShutdown = function() {
-  console.log('SIGTERM/SIGINT signal received: closing HTTP server');
-  server.close(() => {
-    console.log('HTTP server closed');
-    dbclient.disconnectDB();
-
-    process.exit(0);
-  });
-}
+const gracefulShutdown = async function() {
+    logger.error('SIGTERM/SIGINT signal received: closing HTTP server');
+    server.close(async () => {
+        console.log('HTTP server closed');
+        try {
+            await dbclient.disconnectDB();
+        } catch (error) {
+            logger.error('Error during cleanup:', {error: error});
+        }
+        process.exit(0);
+    });
+};
 
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);

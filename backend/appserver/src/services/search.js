@@ -1,6 +1,32 @@
 const axios = require('axios');
 const config = require('../config');
 const logger = require('@backend/common/logger');
+const { GoogleCustomSearch } = require("@langchain/community/tools/google_custom_search")
+
+
+async function langchainGoogleSearch(query, page = 1, pageSize = 20) {
+    try {
+      const tool = new GoogleCustomSearch({
+          apiKey: config.search.GOOGLE_JSON_SEARCH_API_KEY,
+          googleCSEId: config.search.GOOGLE_CSE_ID,
+      });
+
+      const rawString = await tool.invoke(query);
+      const jsonResponse = JSON.parse(rawString);
+      const results = jsonResponse.map((item, index) => ({
+          title: item.title,
+          url: item.link,
+          snippet: item.snippet,
+          score: page,
+      }));
+      return results;
+    }
+    catch (error) {
+      logger.error(`langchainGoogleSearch error: ${query}`, {msg: error.message});
+      return { results: [], total_count: 0};
+    }
+}
+
 
 async function googleSearch(query, page = 1, pageSize = 20) {
   try {
@@ -16,25 +42,23 @@ async function googleSearch(query, page = 1, pageSize = 20) {
       }
     });
     
-    const total_count = parseInt(response.data.searchInformation?.totalResults || "0", 10);
-    return {
-      results: response.data.items.map((item, index) => ({
+    const total_count = parseInt(response.data.searchInformation?.totalResults || "0", 10); // nouse, high no of pages
+    const results = response.data.items.map((item, index) => ({
         title: item.title,
         url: item.link,
         snippet: item.snippet,
         position: start + index,
         score: 1 - ((start + index - 1) / 100) // normalized
-      })),
-      total_count: total_count
-    };
+    }));
+    return results;
   } catch (error) {
     logger.error(`googleSearch error: ${query}`, {msg: error.message});
-    return { results: [], total_count: 0 };
+    return []
   }
 }
 
 // return top searches in the format
-// {results : [{website: url, score: search_score}], total_count}
+// {results : [{website: url, score: search_score}]}
 async function getSearchResults(searchText, page = 1, pageSize = 20, searchEngine = 'googleJson') {
   try {
     if (searchEngine == 'googleJson') {
@@ -55,8 +79,8 @@ async function getSearchResults(searchText, page = 1, pageSize = 20, searchEngin
       //   site:.com
       // `;
       tweakedGoogleSearchText = tweakedGoogleSearchText.replace(/\n+/g, " ").replace(/\s+/g, " ").trim();
-      const { results, total_count } = await googleSearch(tweakedGoogleSearchText, page, pageSize);
-      return { results, total_count };
+      const results = await langchainGoogleSearch(tweakedGoogleSearchText, page, pageSize);
+      return results;
     }
     return null;
   }

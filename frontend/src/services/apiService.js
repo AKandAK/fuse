@@ -44,6 +44,9 @@ export const companyService = {
                 }
                 return b.name.localeCompare(a.name);
             });
+            if (sortedResults.length == 0) {
+                throwAndNotify(new Error(), `Matched 0 results from api`);
+            }
             return {
                 results: sortedResults,
                 totalCount: response.data.total_count
@@ -105,7 +108,7 @@ export const publicApiService = {
             return response.data;
         }
         catch (error) {
-            return {}
+            return null;
         }
     }
 }
