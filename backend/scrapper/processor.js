@@ -3,6 +3,7 @@ const db = require('./services/db')
 const config = require('./config')
 const scheduler = require('./browser/scheduler').getInstance()
 const llm = require('./services/llm')
+const dns = require('dns').promises;
 
 async function processMessage(message) {
     try {
@@ -12,16 +13,15 @@ async function processMessage(message) {
             return;
         }
         
-        let url = body.website || body.linkedin_url;
-        if (url) {
-            url = url.startsWith('http') ? url : `https://${url}`
-            //remove all special characters except . -
-            url = url.replace(/[^a-zA-Z0-9.\/-]/g, '');
-        }
+        let url = body.website
+        url = url.replace(/[^a-zA-Z0-9.\/-]/g, '');
+        url = url.startsWith('http') ? url : `https://${url}`
 
-        // TODO: a simple api call could also work for websites
-        // linked api could give results as well
-        // firecrawl can handle similar processing
+        const exists = await websiteExists(url);
+        if (!exists) {
+            url = body.linkedin_url
+            url = url.startsWith('http') ? url : `https://${url}`
+        }
 
         const result = await scheduler.enqueue(url);
         const cleanedResult = cleanWebsiteContent(result);
@@ -64,6 +64,17 @@ function cleanWebsiteContent(textContent) {
 
   textContent = textContent.replace(/\s{2,}/g, ".");
   return textContent.trim();
+}
+
+async function websiteExists(url) {
+    try {
+        if (!url) return false;
+        const hostname = new URL(url).hostname;
+        await dns.resolve(hostname);
+        return true;
+    } catch (error) {
+        return false;
+    }
 }
 
 module.exports = {
