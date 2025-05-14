@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import config from '../config';
 
 const AuthContext = createContext(null);
@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem(config.TOKEN_KEY);
+        setToken(null)
         setIsAuthenticated(false);
     };
 

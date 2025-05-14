@@ -1,10 +1,10 @@
 import axiosInstance from '../utils/axios';
 import config from '../config';
-import { errorManager } from '../components/ErrorNotification';
+import { errorManager } from '../components/SnackNotification';
 
-const throwAndNotify = (error, defaultMessage) => {
+const throwAndNotify = (error, defaultMessage, severity = 'error') => {
     const message = error.response?.data?.message || defaultMessage;
-    errorManager.notify(message);
+    errorManager.notify(message, severity);
     throw new Error(message);
 };
 
@@ -23,7 +23,7 @@ export const authService = {
             const response = await axiosInstance.post('/user/create', credentials);
             return response.data;
         } catch (error) {
-            throwAndNotify(error, 'Signup failed');
+            throw new Error(error.response?.data?.message || 'signup failed');
         }
     }
 };
@@ -145,7 +145,7 @@ export const bookmarkService = {
             return response.data;
         } catch (error) {
             if (error.response?.status === 409) {
-                errorManager.notify('Bookmark already exists');
+                errorManager.notify('Bookmark already exists', 'info');
                 return;
             }
             throwAndNotify(error, 'Failed to save bookmark');

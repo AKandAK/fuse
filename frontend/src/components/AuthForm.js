@@ -10,15 +10,28 @@ import {
     Link,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-const AuthForm = ({ title, onSubmit, error, buttonText, showSignupLink }) => {
+const AuthForm = ({ title, onSubmit, error, buttonText, showSignupLink, showLoginLink }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit({ email, password });
+    };
+
+    const handleSignupClick = (e) => {
+        e.preventDefault();
+        logout(); // Ensure user is logged out before navigating to signup
+        navigate('/signup');
+    };
+
+    const handleLoginClick = (e) => {
+        e.preventDefault();
+        navigate('/login');
     };
 
     return (
@@ -87,10 +100,23 @@ const AuthForm = ({ title, onSubmit, error, buttonText, showSignupLink }) => {
                                 <Link
                                     component="button"
                                     variant="body2"
-                                    onClick={() => navigate('/signup')}
+                                    onClick={handleSignupClick}
                                     sx={{ textDecoration: 'none' }}
                                 >
                                     Don't have an account? Sign Up
+                                </Link>
+                            </Box>
+                        )}
+                        {
+                            showLoginLink && (
+                            <Box sx={{ textAlign: 'center' }}>
+                                <Link
+                                    component="button"
+                                    variant="body2"
+                                    onClick={handleLoginClick}
+                                    sx={{ textDecoration: 'none' }}
+                                >
+                                    Login Instead
                                 </Link>
                             </Box>
                         )}

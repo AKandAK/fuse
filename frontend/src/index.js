@@ -2,13 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import ErrorNotificationWrapper from './components/ErrorNotificationWrapper';
+import SnackNotificationWrapper from './components/SnackNotificationWrapper';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <ErrorNotificationWrapper>
+    <SnackNotificationWrapper>
       <App />
-    </ErrorNotificationWrapper>
+    </SnackNotificationWrapper>
   </React.StrictMode>
 );
