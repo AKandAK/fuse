@@ -14,8 +14,10 @@ async function processMessage(message) {
         }
         
         let url = body.website
-        url = url.replace(/[^a-zA-Z0-9.\/-]/g, '');
-        url = url.startsWith('http') ? url : `https://${url}`
+        if (url) {
+            url = url.replace(/[^a-zA-Z0-9.\/-]/g, '');
+            url = url.startsWith('http') ? url : `https://${url}`
+        }
 
         const exists = await websiteExists(url);
         if (!exists) {
